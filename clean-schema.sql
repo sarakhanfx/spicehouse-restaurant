@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpiceHouse Restaurant — Lahore ka Asli Swaad</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--red:#C0392B;--red-dark:#922B21;--red-light:#E74C3C;--gold:#D4A017;--cream:#FDF6EC;--cream-dark:#F5E6D0;--dark:#1A0A00;--dark2:#2C1A0E;--gray:#6B5C52;--white:#FFFFFF;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,10,0,0.96);padding:0 5%;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px;}
+.nav-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#fff;}
+.nav-logo span{color:var(--gold);}
+.nav-links{display:flex;gap:28px;list-style:none;}
+.nav-links a{color:rgba(255,255,255,0.75);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-cta{background:var(--red);color:#fff;padding:9px 20px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;transition:background .2s;}
+.nav-cta:hover{background:var(--red-light);}
+.hero{min-height:100vh;background:var(--dark);display:flex;align-items:center;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 60% 50%,rgba(192,57,43,.3) 0%,transparent 70%),radial-gradient(ellipse at 10% 80%,rgba(212,160,23,.15) 0%,transparent 60%);}
+.hero-pat{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px;}
+.hero-content{position:relative;z-index:2;padding:0 5%;max-width:680px;margin-top:68px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,.15);border:1px solid rgba(212,160,23,.4);color:var(--gold);padding:5px 14px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:24px;}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(40px,7vw,76px);line-height:1.05;color:#fff;margin-bottom:18px;}
+.hero h1 em{font-style:normal;color:var(--gold);}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:32px;max-width:460px;}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-primary{background:var(--red);color:#fff;padding:13px 28px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary:hover{background:var(--red-light);transform:translateY(-1px);}
+.btn-outline{background:transparent;color:#fff;padding:13px 28px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500;border:1px solid rgba(255,255,255,.3);transition:all .2s;display:inline-flex;align-items:center;gap:7px;}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.hero-stats{display:flex;gap:36px;margin-top:48px;padding-top:36px;border-top:1px solid rgba(255,255,255,.1);}
+.hsv{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--gold);}
+.hsl{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;text-transform:uppercase;letter-spacing:.5px;}
+section{padding:80px 5%;}
+.sb{display:inline-block;background:rgba(192,57,43,.1);color:var(--red);padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.st{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,44px);font-weight:700;color:var(--dark);line-height:1.15;margin-bottom:10px;}
+.ss{font-size:15px;color:var(--gray);line-height:1.7;max-width:460px;}
+.about-strip{background:var(--dark2);padding:60px 5%;}
+.about-inner{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;max-width:1100px;margin:0 auto;}
+.af-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px;}
+.af{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;}
+.af-icon{font-size:20px;margin-bottom:6px;}
+.af-t{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;}
+.af-d{font-size:11px;color:rgba(255,255,255,.45);}
+.about-img{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:28px;text-align:center;}
+/* MENU */
+.menu-section{background:var(--cream);}
+.cat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+.cat-btn{padding:8px 18px;border-radius:100px;border:1.5px solid rgba(192,57,43,.25);background:transparent;color:var(--gray);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.cat-btn.active,.cat-btn:hover{background:var(--red);color:#fff;border-color:var(--red);}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.mc{background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,.07);transition:transform .2s,box-shadow .2s;}
+.mc:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.09);}
+.mc-img{height:140px;display:flex;align-items:center;justify-content:center;font-size:52px;background:var(--cream-dark);}
+.mc-body{padding:14px;}
+.mc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;}
+.mc-name{font-weight:600;font-size:14px;color:var(--dark);}
+.mc-price{font-weight:700;font-size:15px;color:var(--red);}
+.mc-desc{font-size:11px;color:var(--gray);line-height:1.5;margin-bottom:10px;}
+.mc-tags{display:flex;gap:5px;margin-bottom:10px;}
+.tag{font-size:9px;padding:2px 7px;border-radius:100px;font-weight:700;}
+.tb{background:#FEF3C7;color:#92400E;}
+.ts{background:#FEE2E2;color:#991B1B;}
+.tv{background:#D1FAE5;color:#065F46;}
+.add-btn{width:100%;padding:8px;background:var(--red);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
+.add-btn:hover{background:var(--red-light);}
+.loading-menu{text-align:center;padding:40px;color:var(--gray);font-size:14px;}
+/* CART */
+.cart-float{position:fixed;bottom:22px;right:22px;z-index:999;background:var(--red);color:#fff;padding:12px 20px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;display:none;align-items:center;gap:8px;box-shadow:0 6px 20px rgba(192,57,43,.4);transition:transform .2s;}
+.cart-float.show{display:flex;}
+.cart-float:hover{transform:scale(1.05);}
+.cart-badge{background:var(--gold);color:var(--dark);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+/* MODAL */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:2000;align-items:flex-start;justify-content:flex-end;padding:16px;}
+.mo.open{display:flex;}
+.cm{background:#fff;width:360px;max-width:95vw;border-radius:14px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;}
+.cm-head{padding:18px;border-bottom:1px solid rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:center;}
+.cm-head h3{font-family:'Playfair Display',serif;font-size:18px;color:var(--dark);}
+.cm-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray);}
+.cm-items{flex:1;padding:14px 18px;}
+.ci{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.05);}
+.ci-name{flex:1;font-size:13px;font-weight:500;color:var(--dark);}
+.qc{display:flex;align-items:center;gap:7px;}
+.qb{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(192,57,43,.3);background:transparent;cursor:pointer;font-size:14px;color:var(--red);display:flex;align-items:center;justify-content:center;font-weight:600;}
+.qn{font-size:13px;font-weight:600;min-width:18px;text-align:center;}
+.ci-price{font-size:13px;font-weight:600;color:var(--red);min-width:65px;text-align:right;}
+.cm-foot{padding:14px 18px;border-top:1px solid rgba(0,0,0,.08);}
+.tr{display:flex;justify-content:space-between;font-size:13px;color:var(--gray);margin-bottom:7px;}
+.tr.final{font-size:16px;font-weight:700;color:var(--dark);margin-bottom:14px;}
+.ot-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;}
+.otb{padding:9px;border-radius:7px;border:1.5px solid rgba(0,0,0,.12);background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--gray);transition:all .2s;}
+.otb.active{background:var(--red);color:#fff;border-color:var(--red);}
+.del-fields{margin-bottom:12px;display:none;}
+.del-fields.show{display:block;}
+.inp{width:100%;padding:9px 12px;border:1.5px solid rgba(0,0,0,.12);border-radius:7px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--dark);outline:none;margin-bottom:8px;}
+.inp:focus{border-color:var(--red);}
+.po-btn{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
+.po-btn:hover{background:var(--red-light);}
+.po-btn:disabled{background:#ccc;cursor:not-allowed;}
+.os{text-align:center;padding:28px 18px;}
+.os-icon{font-size:48px;margin-bottom:10px;}
+.os h3{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:6px;color:var(--dark);}
+.os p{font-size:13px;color:var(--gray);line-height:1.6;}
+/* BOOKING */
+.booking-section{background:var(--dark);}
+.bi{max-width:760px;margin:0 auto;text-align:center;}
+.bf{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:32px;text-align:left;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg-full{grid-column:1/-1;}
+.fl{font-size:11px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;display:block;}
+.fi{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#fff;padding:11px 13px;border-radius:7px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:100%;transition:border .2s;}
+.fi:focus{border-color:var(--red);}
+.fi option{background:var(--dark2);}
+.fi::placeholder{color:rgba(255,255,255,.2);}
+.bb{width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;margin-top:18px;font-family:'DM Sans',sans-serif;transition:background .2s;}
+.bb:hover{background:var(--red-light);}
+.bb:disabled{background:#555;cursor:not-allowed;}
+.bsuc{display:none;text-align:center;padding:18px;}
+/* REVIEWS */
+.rv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-top:32px;}
+.rc{background:#fff;border-radius:12px;padding:20px;border:1px solid rgba(0,0,0,.06);}
+.rc-stars{color:var(--gold);font-size:13px;margin-bottom:10px;}
+.rc-text{font-size:13px;color:var(--gray);line-height:1.7;margin-bottom:14px;font-style:italic;}
+.rev{display:flex;align-items:center;gap:9px;}
+.rev-av{width:36px;height:36px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;}
+/* OFFERS */
+.offers-s{background:var(--dark2);padding:70px 5%;}
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;margin-top:32px;}
+.oc{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:22px;position:relative;}
+.o-ribbon{position:absolute;top:14px;right:-6px;background:var(--gold);color:var(--dark);font-size:9px;font-weight:700;padding:3px 12px;letter-spacing:.5px;}
+.o-icon{font-size:32px;margin-bottom:12px;}
+.o-title{font-family:'Playfair Display',serif;font-size:17px;color:#fff;margin-bottom:7px;}
+.o-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:12px;}
+.o-disc{font-size:22px;font-weight:700;color:var(--gold);}
+/* CONTACT */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:36px;align-items:start;}
+.ci-list{display:flex;flex-direction:column;gap:18px;}
+.c-item{display:flex;align-items:flex-start;gap:12px;}
+.c-icon{width:42px;height:42px;background:var(--red);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.c-t{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.c-v{font-size:14px;font-weight:500;color:var(--dark);}
+.map-ph{background:var(--dark2);border-radius:12px;height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+.hg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px;}
+.hi{background:#fff;border-radius:7px;padding:9px 12px;border:1px solid rgba(0,0,0,.07);}
+.hd{font-size:11px;color:var(--gray);margin-bottom:2px;}
+.ht{font-size:12px;font-weight:600;color:var(--dark);}
+footer{background:var(--dark);color:rgba(255,255,255,.45);padding:46px 5% 26px;}
+.fg2{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;margin-bottom:36px;}
+.fc h4{font-size:12px;font-weight:700;color:#fff;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px;}
+.fc ul{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.fc ul a{color:rgba(255,255,255,.45);text-decoration:none;font-size:12px;transition:color .2s;}
+.fc ul a:hover{color:var(--gold);}
+.fb{border-top:1px solid rgba(255,255,255,.07);padding-top:20px;display:flex;justify-content:space-between;align-items:center;}
+.wa{position:fixed;bottom:86px;right:22px;z-index:998;background:#25D366;color:#fff;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 14px rgba(37,211,102,.4);text-decoration:none;transition:transform .2s;}
+.wa:hover{transform:scale(1.1);}
+@keyframes fu{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.hero-content>*{animation:fu .7s ease both;}
+.hero-badge{animation-delay:.1s;}.hero h1{animation-delay:.2s;}.hero-sub{animation-delay:.3s;}.hero-btns{animation-delay:.4s;}.hero-stats{animation-delay:.5s;}
+.toast-msg{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1A6B3C;color:#fff;padding:10px 22px;border-radius:100px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;}
+.toast-msg.show{opacity:1;}
+@media(max-width:768px){.fg2{grid-template-columns:1fr 1fr;}.cg{grid-template-columns:1fr;}.about-inner{grid-template-columns:1fr;}.fg{grid-template-columns:1fr;}.nav-links{display:none;}.hero-stats{gap:22px;}}
+</style>
+</head>
+<body>
+
+<!-- CONFIG: Apni Supabase keys yahan dalen -->
+<script>
+  const SUPABASE_URL = 'https://wmcnrdvyjksxngrktjgu.supabase.co';   // <-- APNI URL
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtY25yZHZ5amtzeG5ncmt0amd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0ODkxMDQsImV4cCI6MjA5MTA2NTEwNH0.LJFUCnx5sXVC8lTjbe7cPwnU1EkkYIFZf6X-pbfKHaI';                       // <-- APNI KEY
+</script>
+
+<div class="toast-msg" id="toast"></div>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">Spice<span>House</span></div>
+    <ul class="nav-links">
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#booking">Reservation</a></li>
+      <li><a href="#offers">Offers</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#booking" class="nav-cta">Table Book Karen</a>
+  </div>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-bg"></div><div class="hero-pat"></div>
+  <div class="hero-content">
+    <div class="hero-badge">⭐ Lahore Ka #1 Restaurant</div>
+    <h1>Asli Swaad,<br><em>Purani Yaadein</em></h1>
+    <p class="hero-sub">20 saal se Lahore ke dil mein. Har dish mein woh purana ghar jaisa swaad.</p>
+    <div class="hero-btns">
+      <a href="#menu" class="btn-primary">🍽️ Menu Dekhein</a>
+      <a href="#booking" class="btn-outline">📅 Table Reserve Karen</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hsv">20+</div><div class="hsl">Saal ka tajurba</div></div>
+      <div><div class="hsv">500+</div><div class="hsl">Roz ke customers</div></div>
+      <div><div class="hsv">4.8★</div><div class="hsl">Google rating</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="about-strip">
+  <div class="about-inner">
+    <div>
+      <div class="sb" style="background:rgba(212,160,23,.15);color:var(--gold)">Hamare Baare Mein</div>
+      <h2 class="st" style="color:#fff">Lahore Ki Ruhani<br>Khushbu — Har Plate Mein</h2>
+      <p class="ss" style="color:rgba(255,255,255,.55)">1999 mein ek choti si dukan se shuru hua yeh safar, aaj Lahore ke behtareen restaurants mein shamil hai.</p>
+      <div class="af-grid">
+        <div class="af"><div class="af-icon">👨‍🍳</div><div class="af-t">Expert Chefs</div><div class="af-d">20 saal ka tajurba</div></div>
+        <div class="af"><div class="af-icon">🌿</div><div class="af-t">Fresh Ingredients</div><div class="af-d">Roz subah fresh material</div></div>
+        <div class="af"><div class="af-icon">🏆</div><div class="af-t">Award Winning</div><div class="af-d">Best restaurant 2023</div></div>
+        <div class="af"><div class="af-icon">🚗</div><div class="af-t">Free Delivery</div><div class="af-d">Rs 800+ par free</div></div>
+      </div>
+    </div>
+    <div class="about-img">
+      <div style="font-size:72px;margin-bottom:12px">🍛</div>
+      <div style="font-family:'Playfair Display',serif;font-size:42px;font-weight:900;color:var(--gold)">20+</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.45)">Saal se aapki khidmat mein</div>
+    </div>
+  </div>
+</div>
+
+<section class="menu-section" id="menu">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:24px">
+    <div><div class="sb">Hamara Menu</div><h2 class="st">Kya Khaenge Aaj?</h2></div>
+    <p class="ss" style="font-size:13px;max-width:240px">Sab fresh ingredients se bana — roz ki taazi recipe</p>
+  </div>
+  <div class="cat-row" id="cat-row"></div>
+  <div class="menu-grid" id="menu-grid"><div class="loading-menu">⏳ Menu load ho raha hai...</div></div>
+</section>
+
+<section class="offers-s" id="offers">
+  <div style="text-align:center"><div class="sb" style="background:rgba(212,160,23,.15);color:var(--gold)">Special Offers</div></div>
+  <h2 class="st" style="color:#fff;text-align:center">Aaj Ke Khaas Deals</h2>
+  <div class="og">
+    <div class="oc"><div class="o-ribbon">BEST DEAL</div><div class="o-icon">👨‍👩‍👧‍👦</div><div class="o-title">Family Meal Deal</div><div class="o-desc">2 Biryani + 1 Karahi + 8 Naan + 4 Drinks</div><div class="o-disc">Rs 1,499 <span style="font-size:13px;color:rgba(255,255,255,.4);text-decoration:line-through">2,100</span></div></div>
+    <div class="oc"><div class="o-icon">🌙</div><div class="o-title">Dinner Special</div><div class="o-desc">Raat 8 ke baad — Mix Grill + 2 Naan + Lassi</div><div class="o-disc">Rs 649</div></div>
+    <div class="oc"><div class="o-icon">🎂</div><div class="o-title">Birthday Package</div><div class="o-desc">Special table setup + free dessert + 10% off</div><div class="o-disc">Free Setup!</div></div>
+    <div class="oc"><div class="o-ribbon">HOT</div><div class="o-icon">🔥</div><div class="o-title">Iftar Platter</div><div class="o-desc">Complete iftar — 6 items + drinks for 4 persons</div><div class="o-disc">Rs 1,200</div></div>
+  </div>
+</section>
+
+<section style="background:#fff">
+  <div class="sb">Customer Reviews</div>
+  <h2 class="st">Hamare Customers Kehte Hain</h2>
+  <div class="rv-grid">
+    <div class="rc"><div class="rc-stars">★★★★★</div><p class="rc-text">"Lahore mein itna acha biryani aur kuch nahi milta. Chicken bilkul perfect tha, masala ekdum sahi."</p><div class="rev"><div class="rev-av">HA</div><div><div style="font-size:13px;font-weight:600">Hassan Ali</div><div style="font-size:11px;color:var(--gray)">2 din pehle</div></div></div></div>
+    <div class="rc"><div class="rc-stars">★★★★★</div><p class="rc-text">"Mix Grill zabardast tha! Service bhi bahut achi thi. Next week phir aana chahte hain family ke saath."</p><div class="rev"><div class="rev-av">ZS</div><div><div style="font-size:13px;font-weight:600">Zara Sheikh</div><div style="font-size:11px;color:var(--gray)">1 hafte pehle</div></div></div></div>
+    <div class="rc"><div class="rc-stars">★★★★☆</div><p class="rc-text">"Karahi ekdum authentic swaad. Delivery bhi time par aayi. Highly recommended for family!"</p><div class="rev"><div class="rev-av">TM</div><div><div style="font-size:13px;font-weight:600">Tariq Mehmood</div><div style="font-size:11px;color:var(--gray)">3 din pehle</div></div></div></div>
+  </div>
+</section>
+
+<section class="booking-section" id="booking">
+  <div class="bi">
+    <div class="sb" style="background:rgba(212,160,23,.15);color:var(--gold)">Table Reservation</div>
+    <h2 class="st" style="color:#fff">Table Reserve Karen</h2>
+    <p class="ss" style="color:rgba(255,255,255,.5);margin:0 auto 32px">Online booking karo — confirmation milega 5 minute mein</p>
+    <div class="bf">
+      <div id="book-form">
+        <div class="fg">
+          <div><label class="fl">Aapka Naam</label><input class="fi" id="bn" placeholder="Full naam"></div>
+          <div><label class="fl">Phone Number</label><input class="fi" id="bp" type="tel" placeholder="0300-0000000"></div>
+          <div><label class="fl">Tarikh</label><input class="fi" id="bd" type="date"></div>
+          <div><label class="fl">Waqt</label>
+            <select class="fi" id="bt">
+              <option value="">Time select karen</option>
+              <option>12:00 PM</option><option>12:30 PM</option><option>1:00 PM</option><option>1:30 PM</option>
+              <option>2:00 PM</option><option>7:00 PM</option><option>7:30 PM</option><option>8:00 PM</option>
+              <option>8:30 PM</option><option>9:00 PM</option><option>9:30 PM</option>
+            </select>
+          </div>
+          <div><label class="fl">Kitne Log</label>
+            <select class="fi" id="bg">
+              <option>1-2 log</option><option>3-4 log</option><option>5-6 log</option>
+              <option>7-10 log</option><option>10+ log (party)</option>
+            </select>
+          </div>
+          <div><label class="fl">Khaas Request (optional)</label><input class="fi" id="br" placeholder="Birthday, anniversary, window seat..."></div>
+        </div>
+        <button class="bb" id="book-btn" onclick="submitBooking()">📅 Table Confirm Karen</button>
+      </div>
+      <div class="bsuc" id="book-suc">
+        <div style="font-size:48px;margin-bottom:12px">✅</div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--gold);margin-bottom:8px">Booking Confirm Ho Gayi!</h3>
+        <p style="font-size:13px;color:rgba(255,255,255,.55)">Aapka table reserve ho gaya. Jaldi milte hain SpiceHouse mein!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="sb">Contact</div>
+  <h2 class="st">Hamare Saath Raabta Karen</h2>
+  <div class="cg">
+    <div>
+      <div class="ci-list">
+        <div class="c-item"><div class="c-icon">📍</div><div><div class="c-t">Address</div><div class="c-v">24-B, MM Alam Road, Gulberg III, Lahore</div></div></div>
+        <div class="c-item"><div class="c-icon">📞</div><div><div class="c-t">Phone</div><div class="c-v">042-111-77423</div></div></div>
+        <div class="c-item"><div class="c-icon">💬</div><div><div class="c-t">WhatsApp</div><div class="c-v">0300-7742301</div></div></div>
+        <div class="c-item"><div class="c-icon">📧</div><div><div class="c-t">Email</div><div class="c-v">hello@spicehouse.pk</div></div></div>
+      </div>
+      <div class="hg">
+        <div class="hi"><div class="hd">Mon–Thu</div><div class="ht">11AM – 11PM</div></div>
+        <div class="hi"><div class="hd">Fri–Sat</div><div class="ht">11AM – 12AM</div></div>
+        <div class="hi"><div class="hd">Sunday</div><div class="ht">12PM – 11PM</div></div>
+        <div class="hi"><div class="hd">Holiday</div><div class="ht">12PM – 10PM</div></div>
+      </div>
+    </div>
+    <div class="map-ph">
+      <div style="font-size:44px">📍</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.55)">SpiceHouse — Gulberg III, Lahore</div>
+      <a href="https://maps.google.com" style="color:var(--gold);font-size:12px;font-weight:600;text-decoration:none">Google Maps par dekhein →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fg2">
+    <div><div class="nav-logo" style="font-family:'Playfair Display',serif;font-size:20px;color:#fff;margin-bottom:10px">Spice<span style="color:var(--gold)">House</span></div><p style="font-size:12px;line-height:1.7;max-width:240px">20 saal se Lahore ke behtareen khaane ki khidmat kar rahe hain.</p></div>
+    <div class="fc"><h4>Quick Links</h4><ul><li><a href="#menu">Menu</a></li><li><a href="#booking">Reservation</a></li><li><a href="#offers">Offers</a></li><li><a href="#contact">Contact</a></li></ul></div>
+    <div class="fc"><h4>Services</h4><ul><li><a href="#">Dine In</a></li><li><a href="#">Home Delivery</a></li><li><a href="#">Takeaway</a></li><li><a href="#">Catering</a></li></ul></div>
+    <div class="fc"><h4>Follow Karen</h4><ul><li><a href="#">Facebook</a></li><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li></ul></div>
+  </div>
+  <div class="fb"><p style="font-size:11px">© 2026 SpiceHouse Restaurant, Lahore</p><a href="admin.html" style="font-size:11px;color:rgba(255,255,255,.3);text-decoration:none">Admin Panel</a></div>
+</footer>
+
+<div class="cart-float" id="cart-float" onclick="openCart()">🛒 Order <div class="cart-badge" id="cart-cnt">0</div></div>
+<a href="https://wa.me/923007742301" class="wa">💬</a>
+
+<div class="mo" id="cart-mo">
+  <div class="cm">
+    <div class="cm-head"><h3>Aapka Order</h3><button class="cm-close" onclick="closeCart()">✕</button></div>
+    <div class="cm-items" id="cart-list"></div>
+    <div class="cm-foot" id="cart-foot"></div>
+  </div>
+</div>
+
+<script>
+// ── SUPABASE INIT ──
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let categories = [], menuItems = [], cart = {}, activeCat = null, orderType = 'dine-in';
+
+// ── TOAST ──
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type === 'error' ? '#7B241C' : '#1A6B3C';
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── LOAD MENU FROM SUPABASE ──
+async function loadMenu() {
+  try {
+    const { data: cats } = await db.from('categories').select('*').order('sort_order');
+    const { data: items } = await db.from('menu_items').select('*, categories(name)').eq('is_available', true).order('sort_order');
+    categories = cats || [];
+    menuItems = items || [];
+    if (!categories.length) { useFallback(); return; }
+    activeCat = categories[0].id;
+    renderCats();
+    renderMenu();
+  } catch(e) {
+    useFallback();
+  }
+}
+
+function useFallback() {
+  categories = [{id:'1',name:'Biryani'},{id:'2',name:'BBQ'},{id:'3',name:'Karahi'},{id:'4',name:'Drinks'},{id:'5',name:'Bread'}];
+  menuItems = [
+    {id:'1',category_id:'1',name:'Chicken Biryani',description:'Dum style, aromatic spices',price:350,icon:'🍛',is_bestseller:true,is_spicy:true,is_veg:false},
+    {id:'2',category_id:'1',name:'Beef Biryani',description:'Tender beef, slow cooked',price:420,icon:'🍲',is_bestseller:true,is_spicy:false,is_veg:false},
+    {id:'3',category_id:'1',name:'Mutton Biryani',description:'Premium mutton, royal recipe',price:550,icon:'🫕',is_bestseller:false,is_spicy:true,is_veg:false},
+    {id:'4',category_id:'1',name:'Veg Biryani',description:'Fresh vegetables, light spices',price:250,icon:'🥘',is_bestseller:false,is_spicy:false,is_veg:true},
+    {id:'5',category_id:'2',name:'Seekh Kabab',description:'Juicy minced beef, charcoal grilled',price:280,icon:'🍢',is_bestseller:true,is_spicy:false,is_veg:false},
+    {id:'6',category_id:'2',name:'Chicken Tikka',description:'Marinated chicken, tandoor mein',price:380,icon:'🍗',is_bestseller:false,is_spicy:true,is_veg:false},
+    {id:'7',category_id:'2',name:'Mix Grill',description:'Tikka + Seekh + Boti — best combo',price:650,icon:'🔥',is_bestseller:true,is_spicy:false,is_veg:false},
+    {id:'8',category_id:'3',name:'Chicken Karahi',description:'Lahori style, desi ghee mein',price:450,icon:'🍳',is_bestseller:true,is_spicy:true,is_veg:false},
+    {id:'9',category_id:'3',name:'Beef Karahi',description:'Slow cooked, thick gravy',price:520,icon:'🫙',is_bestseller:false,is_spicy:true,is_veg:false},
+    {id:'a',category_id:'4',name:'Lassi (Sweet)',description:'Dahi, chini, rose water',price:80,icon:'🥛',is_bestseller:true,is_spicy:false,is_veg:true},
+    {id:'b',category_id:'4',name:'Cold Drink',description:'Pepsi, 7Up, Sprite',price:60,icon:'🥤',is_bestseller:false,is_spicy:false,is_veg:true},
+    {id:'c',category_id:'5',name:'Naan',description:'Tandoor fresh naan',price:25,icon:'🫓',is_bestseller:false,is_spicy:false,is_veg:true},
+    {id:'d',category_id:'5',name:'Paratha',description:'Butter layered paratha',price:40,icon:'🥙',is_bestseller:true,is_spicy:false,is_veg:true},
+  ];
+  activeCat = '1';
+  renderCats();
+  renderMenu();
+}
+
+function renderCats() {
+  document.getElementById('cat-row').innerHTML = categories.map(c =>
+    `<button class="cat-btn ${c.id===activeCat?'active':''}" onclick="switchCat('${c.id}')">${c.name}</button>`
+  ).join('');
+}
+
+function switchCat(id) {
+  activeCat = id;
+  document.querySelectorAll('.cat-btn').forEach((b,i) => b.classList.toggle('active', categories[i]?.id === id));
+  renderMenu();
+}
+
+function renderMenu() {
+  const items = menuItems.filter(i => i.category_id === activeCat);
+  if (!items.length) { document.getElementById('menu-grid').innerHTML = '<div class="loading-menu">Is category mein items nahi hain</div>'; return; }
+  document.getElementById('menu-grid').innerHTML = items.map(item => `
+    <div class="mc">
+      <div class="mc-img">${item.icon}</div>
+      <div class="mc-body">
+        <div class="mc-top"><div class="mc-name">${item.name}</div><div class="mc-price">Rs ${item.price}</div></div>
+        <div class="mc-desc">${item.description || ''}</div>
+        <div class="mc-tags">
+          ${item.is_bestseller ? '<span class="tag tb">⭐ Bestseller</span>' : ''}
+          ${item.is_spicy ? '<span class="tag ts">🌶 Spicy</span>' : ''}
+          ${item.is_veg ? '<span class="tag tv">🌿 Veg</span>' : ''}
+        </div>
+        <button class="add-btn" onclick="addToCart('${item.id}','${item.name}',${item.price})">+ Cart Mein Daalen</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── CART ──
+function addToCart(id, name, price) {
+  if (cart[id]) cart[id].qty++;
+  else cart[id] = { name, price, qty: 1 };
+  updateCartUI();
+  toast(name + ' cart mein add ho gaya!');
+}
+
+function updateCartUI() {
+  const total = Object.values(cart).reduce((s,i) => s + i.qty, 0);
+  document.getElementById('cart-cnt').textContent = total;
+  document.getElementById('cart-float').classList.toggle('show', total > 0);
+}
+
+function openCart() { document.getElementById('cart-mo').classList.add('open'); renderCart(); }
+function closeCart() { document.getElementById('cart-mo').classList.remove('open'); }
+
+function renderCart() {
+  const keys = Object.keys(cart);
+  if (!keys.length) {
+    document.getElementById('cart-list').innerHTML = '<div style="text-align:center;padding:36px;color:#999;font-size:13px">Cart khali hai — menu se items add karen</div>';
+    document.getElementById('cart-foot').innerHTML = '';
+    return;
+  }
+  document.getElementById('cart-list').innerHTML = keys.map(id => `
+    <div class="ci">
+      <div class="ci-name">${cart[id].name}</div>
+      <div class="qc">
+        <button class="qb" onclick="chQty('${id}',-1)">−</button>
+        <span class="qn">${cart[id].qty}</span>
+        <button class="qb" onclick="chQty('${id}',1)">+</button>
+      </div>
+      <div class="ci-price">Rs ${cart[id].qty * cart[id].price}</div>
+    </div>`).join('');
+  const sub = keys.reduce((s,id) => s + cart[id].qty * cart[id].price, 0);
+  const tax = Math.round(sub * 0.05);
+  const del = orderType === 'delivery' ? 80 : 0;
+  document.getElementById('cart-foot').innerHTML = `
+    <div class="ot-grid">
+      <button class="otb ${orderType==='dine-in'?'active':''}" onclick="setOT('dine-in')">🪑 Dine In</button>
+      <button class="otb ${orderType==='takeaway'?'active':''}" onclick="setOT('takeaway')">🥡 Takeaway</button>
+      <button class="otb ${orderType==='delivery'?'active':''}" onclick="setOT('delivery')">🛵 Delivery</button>
+      <button class="otb ${orderType==='whatsapp'?'active':''}" onclick="setOT('whatsapp')">💬 WhatsApp</button>
+    </div>
+    <div class="del-fields ${orderType==='delivery'?'show':''}" id="del-f">
+      <input class="inp" id="d-name" placeholder="Aapka naam">
+      <input class="inp" id="d-phone" placeholder="Phone number">
+      <input class="inp" id="d-addr" placeholder="Delivery address">
+    </div>
+    <div class="tr"><span>Subtotal</span><span>Rs ${sub}</span></div>
+    <div class="tr"><span>Tax (5%)</span><span>Rs ${tax}</span></div>
+    ${del ? `<div class="tr"><span>Delivery</span><span>Rs ${del}</span></div>` : ''}
+    <div class="tr final"><span>Total</span><span>Rs ${sub + tax + del}</span></div>
+    <button class="po-btn" onclick="placeOrder(${sub},${tax},${del})">✅ Order Place Karen — Rs ${sub+tax+del}</button>`;
+}
+
+function setOT(t) { orderType = t; renderCart(); }
+function chQty(id, d) {
+  cart[id].qty += d;
+  if (cart[id].qty <= 0) delete cart[id];
+  updateCartUI();
+  renderCart();
+}
+
+async function placeOrder(sub, tax, del) {
+  if (orderType === 'whatsapp') {
+    const items = Object.values(cart).map(i => `${i.name} x${i.qty}`).join(', ');
+    window.open(`https://wa.me/923007742301?text=Order: ${encodeURIComponent(items)} | Total: Rs ${sub+tax+del}`);
+    return;
+  }
+  const btn = document.querySelector('.po-btn');
+  btn.disabled = true; btn.textContent = 'Order place ho raha hai...';
+  const items = Object.values(cart).map(i => ({ name: i.name, qty: i.qty, price: i.price }));
+  const payload = {
+    order_type: orderType,
+    items,
+    subtotal: sub, tax, delivery_charge: del, total: sub + tax + del,
+    status: 'pending'
+  };
+  if (orderType === 'delivery') {
+    payload.customer_name = document.getElementById('d-name')?.value || '';
+    payload.customer_phone = document.getElementById('d-phone')?.value || '';
+    payload.customer_address = document.getElementById('d-addr')?.value || '';
+  }
+  try {
+    const { error } = await db.from('orders').insert(payload);
+    if (error) throw error;
+    document.getElementById('cart-list').innerHTML = '';
+    document.getElementById('cart-foot').innerHTML = `
+      <div class="os"><div class="os-icon">🎉</div>
+      <h3>Order Place Ho Gaya!</h3>
+      <p>${orderType==='delivery'?'30-45 minute mein delivery ho gi.':'Order kitchen mein bhej diya gaya. Tayaar hone par batayenge.'}</p></div>`;
+    cart = {}; updateCartUI();
+    toast('Order successfully place ho gaya!');
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '✅ Order Place Karen';
+    toast('Order place karne mein masla aaya. Dobara try karen.', 'error');
+  }
+}
+
+// ── BOOKING ──
+document.getElementById('bd').min = new Date().toISOString().split('T')[0];
+
+async function submitBooking() {
+  const name = document.getElementById('bn').value.trim();
+  const phone = document.getElementById('bp').value.trim();
+  const date = document.getElementById('bd').value;
+  const time = document.getElementById('bt').value;
+  const guests = document.getElementById('bg').value;
+  const note = document.getElementById('br').value;
+  if (!name || !phone || !date || !time) { toast('Sab zaruri fields fill karen!', 'error'); return; }
+  const btn = document.getElementById('book-btn');
+  btn.disabled = true; btn.textContent = 'Booking ho rahi hai...';
+  try {
+    const { error } = await db.from('reservations').insert({
+      customer_name: name, customer_phone: phone,
+      reservation_date: date, reservation_time: time,
+      guests: parseInt(guests) || 2, special_request: note, status: 'pending'
+    });
+    if (error) throw error;
+    document.getElementById('book-form').style.display = 'none';
+    document.getElementById('book-suc').style.display = 'block';
+    toast('Booking confirm ho gayi!');
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '📅 Table Confirm Karen';
+    toast('Booking mein masla aaya. Dobara try karen.', 'error');
+  }
+}
+
+// ── CLOSE CART ON OUTSIDE CLICK ──
+document.getElementById('cart-mo').addEventListener('click', function(e){ if(e.target===this) closeCart(); });
+
+// ── INIT ──
+loadMenu();
+</script>
+</body>
+</html>
