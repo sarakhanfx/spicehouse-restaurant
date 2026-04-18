@@ -5,317 +5,584 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SpiceHouse — Admin Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--red:#C0392B;--gold:#D4A017;--sb:#1A0A00;--sb2:#2C1A0E;--bg:#F5F0EB;--w:#fff;--dark:#1A0A00;--gray:#6B5C52;--bd:rgba(0,0,0,.08);--gr:#27AE60;--am:#E67E22;--bl:#2980B9;}
+:root{
+  --red:#C0392B;--red-dark:#922B21;--red-light:#E74C3C;
+  --gold:#D4A017;--sidebar:#1A0A00;--sidebar2:#2C1A0E;
+  --bg:#F5F0EB;--white:#FFFFFF;--dark:#1A0A00;
+  --gray:#6B5C52;--border:rgba(0,0,0,0.08);
+  --green:#27AE60;--amber:#E67E22;--blue:#2980B9;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);display:flex;height:100vh;overflow:hidden;}
-.sb-wrap{width:224px;background:var(--sb);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
-.sb-wrap::-webkit-scrollbar{width:0}
-.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);}
-.sb-name{font-family:'Playfair Display',serif;font-size:17px;color:#fff;}
-.sb-name span{color:var(--gold);}
-.sb-sub{font-size:10px;color:rgba(255,255,255,.3);margin-top:1px;}
-.sb-usr{display:flex;align-items:center;gap:9px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);}
-.sb-av{width:32px;height:32px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
-.sb-un{font-size:12px;font-weight:500;color:#fff;}
-.sb-ur{font-size:10px;color:rgba(255,255,255,.35);}
-.sb-sec{padding:8px 0 2px;}
-.sb-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.22);padding:5px 16px 3px;}
-.si{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;font-size:12px;color:rgba(255,255,255,.5);border-left:2px solid transparent;transition:all .15s;text-decoration:none;}
-.si:hover{background:rgba(255,255,255,.04);color:rgba(255,255,255,.8);}
-.si.active{background:rgba(192,57,43,.18);color:#fff;border-left-color:var(--red);}
-.si-ic{font-size:14px;width:17px;text-align:center;}
-.si-bdg{margin-left:auto;background:var(--red);color:#fff;font-size:9px;padding:1px 6px;border-radius:100px;font-weight:600;}
+
+/* SIDEBAR */
+.sidebar{width:230px;background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar::-webkit-scrollbar{width:0;}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.sb-logo-name{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);}
+.sb-logo-name span{color:var(--gold);}
+.sb-logo-sub{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;}
+.sb-user{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.sb-avatar{width:34px;height:34px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-user-name{font-size:13px;font-weight:500;color:#fff;}
+.sb-user-role{font-size:11px;color:rgba(255,255,255,0.4);}
+.sb-section{padding:10px 0 4px;}
+.sb-section-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.25);padding:6px 18px 4px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.55);border-left:3px solid transparent;transition:all 0.15s;text-decoration:none;}
+.sb-item:hover{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.85);}
+.sb-item.active{background:rgba(192,57,43,0.2);color:#fff;border-left-color:var(--red);}
+.sb-icon{font-size:15px;width:18px;text-align:center;}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;padding:1px 7px;border-radius:100px;font-weight:600;}
+
+/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.topbar{background:var(--w);border-bottom:1px solid var(--bd);padding:0 22px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.tb-title{font-size:15px;font-weight:600;color:var(--dark);}
-.tb-r{display:flex;align-items:center;gap:12px;}
-.tb-clk{font-size:12px;color:var(--gray);}
-.content{flex:1;overflow-y:auto;padding:20px;}
-.content::-webkit-scrollbar{width:4px;}
-.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:2px;}
-.page{display:none;}.page.active{display:block;}
-.sr{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
-.sc{background:var(--w);border-radius:11px;padding:16px;border:1px solid var(--bd);}
-.sc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
-.si2{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
-.sc-ch{font-size:10px;font-weight:600;padding:2px 7px;border-radius:100px;}
-.cu{background:#D5F5E3;color:#1A8048;}.cd{background:#FDEDEC;color:#922B21;}
-.sc-v{font-size:20px;font-weight:700;color:var(--dark);}
-.sc-l{font-size:11px;color:var(--gray);margin-top:2px;}
-.card{background:var(--w);border-radius:11px;border:1px solid var(--bd);padding:16px;margin-bottom:14px;}
-.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.ct{font-size:13px;font-weight:600;color:var(--dark);}
-.tc{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.thr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--gray);letter-spacing:.3px;border-bottom:1px solid var(--bd);text-transform:uppercase;}
-td{padding:9px 10px;color:var(--dark);border-bottom:1px solid rgba(0,0,0,.03);}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(0,0,0,.01);}
-.bdg{display:inline-flex;font-size:10px;padding:2px 8px;border-radius:100px;font-weight:600;}
-.bg{background:#D5F5E3;color:#1A8048;}.br{background:#FDEDEC;color:#922B21;}.ba{background:#FEF9E7;color:#784212;}.bb2{background:#D6EAF8;color:#1A5276;}.bgr{background:#F2F3F4;color:#515A5A;}
-.btn{padding:7px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
-.btn-r{background:var(--red);color:#fff;}.btn-r:hover{background:#E74C3C;}
-.btn-o{background:transparent;border:1.5px solid var(--bd);color:var(--dark);}.btn-o:hover{border-color:var(--red);color:var(--red);}
-.btn-g{background:var(--gr);color:#fff;}
-.btn-sm{padding:4px 10px;font-size:11px;}
-.btn-red-sm{background:var(--red);color:#fff;padding:4px 10px;font-size:11px;}
-.alert{padding:10px 13px;border-radius:8px;font-size:12px;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
-.al-r{background:#FDEDEC;color:#7B241C;border:1px solid #F5B7B1;}
-.al-a{background:#FEF9E7;color:#7D6608;border:1px solid #FAD7A0;}
-.al-g{background:#D5F5E3;color:#1A6B3C;border:1px solid #A9DFBF;}
-.pr{margin-bottom:10px;}
-.pl{display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-bottom:4px;}
-.pb{height:5px;background:#F0EDE8;border-radius:3px;overflow:hidden;}
-.pf{height:100%;border-radius:3px;}
-.inp{width:100%;padding:9px 11px;border:1.5px solid var(--bd);border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--w);outline:none;transition:border .2s;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-size:16px;font-weight:600;color:var(--dark);}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.topbar-date{font-size:13px;color:var(--gray);}
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;font-size:20px;}
+.notif-dot{position:absolute;top:0;right:0;width:8px;height:8px;background:var(--red);border-radius:50%;}
+.content{flex:1;overflow-y:auto;padding:24px;}
+.content::-webkit-scrollbar{width:5px;}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:3px;}
+
+/* PAGE */
+.page{display:none;}
+.page.active{display:block;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--white);border-radius:12px;padding:18px;border:1px solid var(--border);}
+.stat-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.stat-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.stat-change{font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px;}
+.change-up{background:#D5F5E3;color:#1A8048;}
+.change-down{background:#FDEDEC;color:#922B21;}
+.stat-val{font-size:22px;font-weight:700;color:var(--dark);}
+.stat-lbl{font-size:12px;color:var(--gray);margin-top:3px;}
+
+/* CARDS */
+.card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:18px;margin-bottom:16px;}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.card-title{font-size:14px;font-weight:600;color:var(--dark);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{text-align:left;padding:9px 12px;font-size:11px;font-weight:600;color:var(--gray);letter-spacing:0.3px;border-bottom:1px solid var(--border);text-transform:uppercase;}
+.tbl td{padding:10px 12px;color:var(--dark);border-bottom:1px solid rgba(0,0,0,0.04);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(0,0,0,0.015);}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:3px 9px;border-radius:100px;font-weight:600;}
+.b-green{background:#D5F5E3;color:#1A8048;}
+.b-red{background:#FDEDEC;color:#922B21;}
+.b-amber{background:#FEF9E7;color:#784212;}
+.b-blue{background:#D6EAF8;color:#1A5276;}
+.b-gray{background:#F2F3F4;color:#515A5A;}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{background:var(--red-light);}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--dark);}
+.btn-outline:hover{border-color:var(--red);color:var(--red);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+
+/* ALERT */
+.alert{padding:11px 14px;border-radius:9px;font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.alert-red{background:#FDEDEC;color:#7B241C;border:1px solid #F5B7B1;}
+.alert-amber{background:#FEF9E7;color:#7D6608;border:1px solid #FAD7A0;}
+.alert-green{background:#D5F5E3;color:#1A6B3C;border:1px solid #A9DFBF;}
+
+/* PROGRESS */
+.prog-row{margin-bottom:12px;}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--gray);margin-bottom:5px;}
+.prog-bar{height:6px;background:#F0EDE8;border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width 0.5s;}
+
+/* INPUT */
+.inp{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--white);outline:none;transition:border 0.2s;}
 .inp:focus{border-color:var(--red);}
-.ig{margin-bottom:12px;}
-.il{font-size:10px;font-weight:600;color:var(--gray);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.3px;}
-.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.tm{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;}
-.tc2{border-radius:9px;padding:11px 7px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;transition:transform .15s;border:1px solid transparent;}
-.tc2:hover{transform:scale(1.04);}
-.tocc{background:#FDEDEC;color:#7B241C;border-color:#F5B7B1;}
-.tfre{background:#D5F5E3;color:#1A6B3C;border-color:#A9DFBF;}
-.tres{background:#FEF9E7;color:#784212;border-color:#FAD7A0;}
-.bc{display:flex;align-items:flex-end;gap:7px;height:110px;margin-top:8px;}
-.bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.bf2{width:100%;border-radius:3px 3px 0 0;}
-.bl2{font-size:9px;color:var(--gray);}
-.bv{font-size:9px;font-weight:600;color:var(--dark);}
-.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
-.mo.open{display:flex;}
-.mb{background:var(--w);border-radius:14px;padding:24px;width:420px;max-width:95vw;max-height:85vh;overflow-y:auto;}
-.mt{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:18px;}
-.mc2{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray);margin-top:-2px;}
-.loading{text-align:center;padding:30px;color:var(--gray);font-size:13px;}
-.toast2{position:fixed;top:70px;right:20px;background:#1A6B3C;color:#fff;padding:9px 18px;border-radius:100px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;}
-.toast2.show{opacity:1;}
-@media(max-width:900px){.sb-wrap{width:56px;}.sb-name,.sb-sub,.sb-lbl,.si span,.sb-un,.sb-ur,.si-bdg{display:none;}.si{justify-content:center;padding:11px;}.sr{grid-template-columns:1fr 1fr;}.tc,.thr{grid-template-columns:1fr;}.fg2{grid-template-columns:1fr;}}
+.inp-group{margin-bottom:14px;}
+.inp-label{font-size:12px;font-weight:600;color:var(--gray);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:0.3px;}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* TABLE STATUS MAP */
+.table-map{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.tmap-cell{border-radius:10px;padding:12px 8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;transition:transform 0.15s;border:1px solid transparent;}
+.tmap-cell:hover{transform:scale(1.04);}
+.tmap-occ{background:#FDEDEC;color:#7B241C;border-color:#F5B7B1;}
+.tmap-free{background:#D5F5E3;color:#1A6B3C;border-color:#A9DFBF;}
+.tmap-res{background:#FEF9E7;color:#784212;border-color:#FAD7A0;}
+.tmap-sub{font-size:10px;font-weight:400;margin-top:2px;}
+
+/* CHART BAR */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:10px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;transition:height 0.4s;}
+.bar-label{font-size:10px;color:var(--gray);}
+.bar-val{font-size:10px;font-weight:600;color:var(--dark);}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal-box{background:var(--white);border-radius:16px;padding:28px;width:460px;max-width:95vw;max-height:85vh;overflow-y:auto;}
+.modal-title{font-size:17px;font-weight:700;color:var(--dark);margin-bottom:20px;}
+.modal-close{float:right;background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);margin-top:-4px;}
+
+@media(max-width:900px){
+  .sidebar{width:60px;}
+  .sb-logo-name,.sb-logo-sub,.sb-section-label,.sb-item span,.sb-user-name,.sb-user-role,.sb-badge{display:none;}
+  .sb-item{justify-content:center;padding:12px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .two-col,.three-col{grid-template-columns:1fr;}
+  .form-grid-2{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
 
-<script>
-  const SUPABASE_URL = 'https://wmcnrdvyjksxngrktjgu.supabase.co';   // <-- APNI URL
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtY25yZHZ5amtzeG5ncmt0amd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0ODkxMDQsImV4cCI6MjA5MTA2NTEwNH0.LJFUCnx5sXVC8lTjbe7cPwnU1EkkYIFZf6X-pbfKHaI';                       // <-- APNI KEY
-</script>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-name">Spice<span>House</span></div>
+    <div class="sb-logo-sub">Admin Dashboard</div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar">OW</div>
+    <div><div class="sb-user-name">Owner</div><div class="sb-user-role">Super Admin</div></div>
+  </div>
 
-<div class="toast2" id="toast2"></div>
+  <div class="sb-section">
+    <div class="sb-section-label">Overview</div>
+    <a class="sb-item active" onclick="nav('dashboard',this)"><span class="sb-icon">▦</span><span>Dashboard</span></a>
+  </div>
 
-<div class="sb-wrap">
-  <div class="sb-logo"><div class="sb-name">Spice<span>House</span></div><div class="sb-sub">Admin Dashboard</div></div>
-  <div class="sb-usr"><div class="sb-av">OW</div><div><div class="sb-un">Owner</div><div class="sb-ur">Super Admin</div></div></div>
-  <div class="sb-sec"><div class="sb-lbl">Overview</div><a class="si active" onclick="nav('dashboard',this)"><span class="si-ic">▦</span><span>Dashboard</span></a></div>
-  <div class="sb-sec"><div class="sb-lbl">Operations</div>
-    <a class="si" onclick="nav('orders',this)"><span class="si-ic">🛒</span><span>Orders</span><span class="si-bdg" id="ob">0</span></a>
-    <a class="si" onclick="nav('tables',this)"><span class="si-ic">🪑</span><span>Tables</span></a>
-    <a class="si" onclick="nav('reservations',this)"><span class="si-ic">📅</span><span>Reservations</span></a>
-    <a class="si" onclick="nav('menu',this)"><span class="si-ic">🍽️</span><span>Menu Manager</span></a>
-    <a class="si" onclick="nav('inventory',this)"><span class="si-ic">📦</span><span>Inventory</span></a>
+  <div class="sb-section">
+    <div class="sb-section-label">Operations</div>
+    <a class="sb-item" onclick="nav('orders',this)"><span class="sb-icon">🛒</span><span>Orders</span><span class="sb-badge" id="order-badge">12</span></a>
+    <a class="sb-item" onclick="nav('tables',this)"><span class="sb-icon">🪑</span><span>Tables</span></a>
+    <a class="sb-item" onclick="nav('reservations',this)"><span class="sb-icon">📅</span><span>Reservations</span></a>
+    <a class="sb-item" onclick="nav('menu',this)"><span class="sb-icon">🍽️</span><span>Menu Manager</span></a>
+    <a class="sb-item" onclick="nav('inventory',this)"><span class="sb-icon">📦</span><span>Inventory</span><span class="sb-badge" style="background:var(--amber)">3</span></a>
   </div>
-  <div class="sb-sec"><div class="sb-lbl">Staff & HR</div>
-    <a class="si" onclick="nav('staff',this)"><span class="si-ic">👥</span><span>Staff List</span></a>
-    <a class="si" onclick="nav('attendance',this)"><span class="si-ic">📋</span><span>Attendance</span></a>
-    <a class="si" onclick="nav('salary',this)"><span class="si-ic">💰</span><span>Salary</span></a>
-    <a class="si" onclick="nav('shifts',this)"><span class="si-ic">🕐</span><span>Shift Planner</span></a>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Staff & HR</div>
+    <a class="sb-item" onclick="nav('staff',this)"><span class="sb-icon">👥</span><span>Staff List</span></a>
+    <a class="sb-item" onclick="nav('attendance',this)"><span class="sb-icon">📋</span><span>Attendance</span></a>
+    <a class="sb-item" onclick="nav('salary',this)"><span class="sb-icon">💰</span><span>Salary & Payroll</span></a>
+    <a class="sb-item" onclick="nav('shifts',this)"><span class="sb-icon">🕐</span><span>Shift Planner</span></a>
   </div>
-  <div class="sb-sec"><div class="sb-lbl">Finance</div>
-    <a class="si" onclick="nav('expenses',this)"><span class="si-ic">🧾</span><span>Expenses</span></a>
-    <a class="si" onclick="nav('reports',this)"><span class="si-ic">📈</span><span>Reports</span></a>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Finance</div>
+    <a class="sb-item" onclick="nav('budget',this)"><span class="sb-icon">📊</span><span>Budget Planner</span></a>
+    <a class="sb-item" onclick="nav('expenses',this)"><span class="sb-icon">🧾</span><span>Daily Expenses</span></a>
+    <a class="sb-item" onclick="nav('reports',this)"><span class="sb-icon">📈</span><span>Sales Reports</span></a>
   </div>
-  <div class="sb-sec"><div class="sb-lbl">System</div>
-    <a class="si" onclick="nav('settings',this)"><span class="si-ic">⚙️</span><span>Settings</span></a>
-    <a class="si" href="index.html" target="_blank"><span class="si-ic">🌐</span><span>View Website</span></a>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Customers</div>
+    <a class="sb-item" onclick="nav('customers',this)"><span class="sb-icon">🤝</span><span>Customers</span></a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">System</div>
+    <a class="sb-item" onclick="nav('settings',this)"><span class="sb-icon">⚙️</span><span>Settings</span></a>
+    <a class="sb-item" href="spicehouse-website.html" target="_blank"><span class="sb-icon">🌐</span><span>View Website</span></a>
   </div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="tb-title" id="pg-title">Dashboard</div>
-    <div class="tb-r"><div class="tb-clk" id="clk"></div><button style="background:none;border:none;font-size:18px;cursor:pointer">🔔</button></div>
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="live-clock"></div>
+      <button class="notif-btn" title="Notifications">🔔<div class="notif-dot"></div></button>
+    </div>
   </div>
+
   <div class="content">
 
     <!-- DASHBOARD -->
     <div class="page active" id="pg-dashboard">
-      <div class="sr" id="dash-stats"></div>
-      <div id="dash-alerts"></div>
-      <div class="tc">
-        <div class="card"><div class="ch"><div class="ct">Is hafte ki sales</div></div><div class="bc" id="week-bc"></div></div>
-        <div class="card"><div class="ch"><div class="ct">Top items aaj</div></div><div id="top-items-dash"></div></div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card-top"><div class="stat-icon" style="background:#FDEDEC">💰</div><span class="stat-change change-up">+12%</span></div>
+          <div class="stat-val" id="d-rev">Rs 47,200</div><div class="stat-lbl">Aaj ki revenue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top"><div class="stat-icon" style="background:#D6EAF8">🛒</div><span class="stat-change change-up">+8%</span></div>
+          <div class="stat-val" id="d-orders">183</div><div class="stat-lbl">Aaj ke orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top"><div class="stat-icon" style="background:#D5F5E3">👥</div><span class="stat-change change-down">-1</span></div>
+          <div class="stat-val">24/28</div><div class="stat-lbl">Staff present</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top"><div class="stat-icon" style="background:#FEF9E7">🪑</div><span class="stat-change change-up">60%</span></div>
+          <div class="stat-val">12/20</div><div class="stat-lbl">Tables occupied</div>
+        </div>
       </div>
-      <div class="tc">
-        <div class="card"><div class="ch"><div class="ct">Recent orders</div><button class="btn btn-o btn-sm" onclick="nav('orders',null)">Sab dekhein</button></div><div id="recent-orders-dash"></div></div>
-        <div class="card"><div class="ch"><div class="ct">Aaj ki attendance</div></div><div id="attend-dash"></div></div>
+
+      <div class="alert alert-red">⚠️ Chicken stock critical — sirf 2 kg bacha! Supplier ko call karen.</div>
+      <div class="alert alert-amber">⏰ Ali Khan (Waiter) aaj 45 min late aya — attendance record mein note ho gaya.</div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Is hafte ki daily sales</div></div>
+          <div class="bar-chart" id="week-chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Top selling items</div></div>
+          <div id="top-items"></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Recent orders</div><button class="btn btn-outline btn-sm" onclick="nav('orders',null)">Sab dekhein</button></div>
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>#0183</td><td>Dine In T3</td><td>Rs 820</td><td><span class="badge b-amber">Cooking</span></td></tr>
+              <tr><td>#0182</td><td>Delivery</td><td>Rs 560</td><td><span class="badge b-blue">On Way</span></td></tr>
+              <tr><td>#0181</td><td>Takeaway</td><td>Rs 730</td><td><span class="badge b-green">Done</span></td></tr>
+              <tr><td>#0180</td><td>Dine In T7</td><td>Rs 1,290</td><td><span class="badge b-green">Done</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Aaj ki attendance</div><button class="btn btn-outline btn-sm" onclick="nav('attendance',null)">Detail</button></div>
+          <table class="tbl">
+            <thead><tr><th>Staff</th><th>In</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Ahmed Khan</td><td>08:55</td><td><span class="badge b-green">Present</span></td></tr>
+              <tr><td>Ali Khan</td><td>09:45</td><td><span class="badge b-amber">Late</span></td></tr>
+              <tr><td>Sara Bibi</td><td>09:02</td><td><span class="badge b-green">Present</span></td></tr>
+              <tr><td>Bilal Ahmed</td><td>—</td><td><span class="badge b-red">Absent</span></td></tr>
+              <tr><td>Fatima Noor</td><td>09:00</td><td><span class="badge b-blue">Half Day</span></td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
     <!-- ORDERS -->
     <div class="page" id="pg-orders">
-      <div class="sr" id="orders-stats"></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val">183</div><div class="stat-lbl">Total aaj</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--amber)">12</div><div class="stat-lbl">Active / Kitchen mein</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--blue)">8</div><div class="stat-lbl">Delivery on way</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">163</div><div class="stat-lbl">Completed</div></div>
+      </div>
       <div class="card">
-        <div class="ch"><div class="ct">Sab orders (realtime)</div>
-          <div style="display:flex;gap:8px">
-            <select class="inp" id="order-filter" style="width:130px;padding:6px 10px" onchange="filterOrders()">
-              <option value="">Sab orders</option>
-              <option value="pending">Pending</option><option value="cooking">Cooking</option>
-              <option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option>
-            </select>
-            <button class="btn btn-r btn-sm" onclick="openMo('new-order')">+ Naya Order</button>
-          </div>
+        <div class="card-head">
+          <div class="card-title">Sab orders</div>
+          <button class="btn btn-red btn-sm" onclick="openModal('add-order')">+ Naya Order</button>
         </div>
-        <div id="orders-table"><div class="loading">Orders load ho rahi hain...</div></div>
+        <table class="tbl">
+          <thead><tr><th>Order #</th><th>Type</th><th>Items</th><th>Customer</th><th>Amount</th><th>Time</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
       </div>
     </div>
 
     <!-- TABLES -->
     <div class="page" id="pg-tables">
-      <div class="sr" id="tables-stats"></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" style="color:var(--red)">12</div><div class="stat-lbl">Occupied</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">6</div><div class="stat-lbl">Available</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--amber)">2</div><div class="stat-lbl">Reserved</div></div>
+        <div class="stat-card"><div class="stat-val">20</div><div class="stat-lbl">Total tables</div></div>
+      </div>
       <div class="card">
-        <div class="ch"><div class="ct">Live table map — click karke status change karen</div>
-          <div style="display:flex;gap:10px;font-size:11px;color:var(--gray)"><span>🟩 Available</span><span>🟥 Occupied</span><span>🟨 Reserved</span></div>
-        </div>
-        <div class="tm" id="table-map"><div class="loading">Tables load ho rahi hain...</div></div>
+        <div class="card-head"><div class="card-title">Live table map</div><div style="display:flex;gap:12px;font-size:12px;color:var(--gray)"><span>🟩 Available</span><span>🟥 Occupied</span><span>🟨 Reserved</span></div></div>
+        <div class="table-map" id="table-map"></div>
       </div>
     </div>
 
     <!-- RESERVATIONS -->
     <div class="page" id="pg-reservations">
       <div class="card">
-        <div class="ch"><div class="ct">Table reservations</div><button class="btn btn-r btn-sm" onclick="openMo('new-res')">+ Nai Booking</button></div>
-        <div id="res-table"><div class="loading">Reservations load ho rahi hain...</div></div>
+        <div class="card-head"><div class="card-title">Table reservations</div><button class="btn btn-red btn-sm" onclick="openModal('add-reservation')">+ Nai Booking</button></div>
+        <table class="tbl">
+          <thead><tr><th>Customer</th><th>Phone</th><th>Date</th><th>Time</th><th>Guests</th><th>Table</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Ahmed Family</td><td>0300-xxx</td><td>Apr 6</td><td>7:00 PM</td><td>8</td><td>T4</td><td><span class="badge b-amber">Upcoming</span></td><td><button class="btn btn-sm btn-outline">Confirm</button></td></tr>
+            <tr><td>Nadia Bibi</td><td>0321-xxx</td><td>Apr 6</td><td>8:30 PM</td><td>4</td><td>T10</td><td><span class="badge b-amber">Upcoming</span></td><td><button class="btn btn-sm btn-outline">Confirm</button></td></tr>
+            <tr><td>Arif & Co.</td><td>0311-xxx</td><td>Apr 7</td><td>1:00 PM</td><td>12</td><td>VIP Hall</td><td><span class="badge b-green">Confirmed</span></td><td><button class="btn btn-sm btn-outline">Cancel</button></td></tr>
+            <tr><td>Sana Wedding</td><td>0345-xxx</td><td>Apr 10</td><td>8:00 PM</td><td>50</td><td>Hall A</td><td><span class="badge b-blue">Tentative</span></td><td><button class="btn btn-sm btn-outline">Confirm</button></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- MENU MANAGER -->
     <div class="page" id="pg-menu">
       <div class="card">
-        <div class="ch"><div class="ct">Menu items</div><button class="btn btn-r btn-sm" onclick="openMo('new-item')">+ Item Add Karen</button></div>
-        <div id="menu-table"><div class="loading">Menu load ho raha hai...</div></div>
+        <div class="card-head"><div class="card-title">Menu items — <span id="menu-count">6</span> active</div><button class="btn btn-red btn-sm" onclick="openModal('add-item')">+ Add Item</button></div>
+        <table class="tbl">
+          <thead><tr><th>Photo</th><th>Item</th><th>Category</th><th>Price</th><th>Cost</th><th>Margin</th><th>Available</th><th>Action</th></tr></thead>
+          <tbody id="menu-tbody"></tbody>
+        </table>
       </div>
     </div>
 
     <!-- INVENTORY -->
     <div class="page" id="pg-inventory">
-      <div id="inv-alerts"></div>
+      <div class="alert alert-red">⚠️ 3 items critical level par hain — abhi order karen!</div>
       <div class="card">
-        <div class="ch"><div class="ct">Kitchen stock</div><button class="btn btn-r btn-sm" onclick="openMo('new-inv')">+ Stock Add</button></div>
-        <div id="inv-table"><div class="loading">Inventory load ho rahi hai...</div></div>
+        <div class="card-head"><div class="card-title">Kitchen stock</div><button class="btn btn-red btn-sm" onclick="openModal('add-stock')">+ Stock Add Karen</button></div>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th>Category</th><th>Current Stock</th><th>Min Level</th><th>Unit Cost</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Chicken</td><td>Meat</td><td>2 kg</td><td>10 kg</td><td>Rs 360/kg</td><td><span class="badge b-red">Critical</span></td><td><button class="btn btn-sm btn-red">Order Karo</button></td></tr>
+            <tr><td>Basmati Rice</td><td>Grain</td><td>25 kg</td><td>15 kg</td><td>Rs 200/kg</td><td><span class="badge b-green">OK</span></td><td><button class="btn btn-sm btn-outline">Update</button></td></tr>
+            <tr><td>Cooking Oil</td><td>Ingredient</td><td>8 L</td><td>10 L</td><td>Rs 280/L</td><td><span class="badge b-amber">Low</span></td><td><button class="btn btn-sm btn-outline">Update</button></td></tr>
+            <tr><td>Tomatoes</td><td>Vegetable</td><td>3 kg</td><td>5 kg</td><td>Rs 80/kg</td><td><span class="badge b-amber">Low</span></td><td><button class="btn btn-sm btn-outline">Update</button></td></tr>
+            <tr><td>Spices Mix</td><td>Spice</td><td>2 kg</td><td>1 kg</td><td>Rs 500/kg</td><td><span class="badge b-green">OK</span></td><td><button class="btn btn-sm btn-outline">Update</button></td></tr>
+            <tr><td>Naan Flour</td><td>Grain</td><td>30 kg</td><td>10 kg</td><td>Rs 90/kg</td><td><span class="badge b-green">OK</span></td><td><button class="btn btn-sm btn-outline">Update</button></td></tr>
+            <tr><td>Desi Ghee</td><td>Fat</td><td>1.5 kg</td><td>3 kg</td><td>Rs 1,200/kg</td><td><span class="badge b-red">Critical</span></td><td><button class="btn btn-sm btn-red">Order Karo</button></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- STAFF -->
     <div class="page" id="pg-staff">
-      <div class="sr" id="staff-stats"></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val">28</div><div class="stat-lbl">Total staff</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">24</div><div class="stat-lbl">Active</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--amber)">2</div><div class="stat-lbl">On leave</div></div>
+        <div class="stat-card"><div class="stat-val">Rs 3.2L</div><div class="stat-lbl">Monthly payroll</div></div>
+      </div>
       <div class="card">
-        <div class="ch"><div class="ct">Staff list</div><button class="btn btn-r btn-sm" onclick="openMo('new-staff')">+ Staff Add Karen</button></div>
-        <div id="staff-table"><div class="loading">Staff load ho rahi hai...</div></div>
+        <div class="card-head"><div class="card-title">Staff list</div><button class="btn btn-red btn-sm" onclick="openModal('add-staff')">+ Staff Add Karen</button></div>
+        <table class="tbl">
+          <thead><tr><th>Naam</th><th>Role</th><th>Phone</th><th>CNIC</th><th>Salary</th><th>Join Date</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="staff-tbody"></tbody>
+        </table>
       </div>
     </div>
 
     <!-- ATTENDANCE -->
     <div class="page" id="pg-attendance">
-      <div class="sr" id="att-stats"></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">24</div><div class="stat-lbl">Present</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--red)">2</div><div class="stat-lbl">Absent</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--amber)">3</div><div class="stat-lbl">Late</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--blue)">1</div><div class="stat-lbl">Half Day</div></div>
+      </div>
       <div class="card">
-        <div class="ch"><div class="ct">Aaj ki attendance</div><button class="btn btn-r btn-sm" onclick="openMo('new-att')">+ Mark Attendance</button></div>
-        <div id="att-table"><div class="loading">Attendance load ho rahi hai...</div></div>
+        <div class="card-head">
+          <div class="card-title">Aaj ki attendance — April 6, 2026</div>
+          <button class="btn btn-red btn-sm" onclick="openModal('mark-attend')">+ Manual Entry</button>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Staff</th><th>Role</th><th>Check In</th><th>Check Out</th><th>Hours</th><th>Status</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>Ahmed Khan</td><td>Chef</td><td>08:55 AM</td><td>—</td><td>5h 5m</td><td><span class="badge b-green">Present</span></td><td>—</td></tr>
+            <tr><td>Ali Khan</td><td>Waiter</td><td>09:45 AM</td><td>—</td><td>4h 15m</td><td><span class="badge b-amber">Late</span></td><td>45 min late</td></tr>
+            <tr><td>Sara Bibi</td><td>Cashier</td><td>09:02 AM</td><td>—</td><td>4h 58m</td><td><span class="badge b-green">Present</span></td><td>—</td></tr>
+            <tr><td>Bilal Ahmed</td><td>Guard</td><td>—</td><td>—</td><td>0</td><td><span class="badge b-red">Absent</span></td><td>No call</td></tr>
+            <tr><td>Fatima Noor</td><td>Waitress</td><td>09:00 AM</td><td>02:00 PM</td><td>5h 0m</td><td><span class="badge b-blue">Half Day</span></td><td>Doctor visit</td></tr>
+            <tr><td>Raza Hussain</td><td>Kitchen</td><td>08:45 AM</td><td>—</td><td>5h 15m</td><td><span class="badge b-green">Present</span></td><td>—</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- SALARY -->
     <div class="page" id="pg-salary">
-      <div class="sr" id="sal-stats"></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val">Rs 3,20,000</div><div class="stat-lbl">Gross payroll</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--red)">Rs 12,400</div><div class="stat-lbl">Total deductions</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">Rs 8,500</div><div class="stat-lbl">Total bonuses</div></div>
+        <div class="stat-card"><div class="stat-val">Rs 3,16,100</div><div class="stat-lbl">Net payroll</div></div>
+      </div>
       <div class="card">
-        <div class="ch"><div class="ct">Salary records</div><button class="btn btn-r btn-sm" onclick="genSalary()">Generate Payroll</button></div>
-        <div id="sal-table"><div class="loading">Salary records load ho rahi hain...</div></div>
+        <div class="card-head">
+          <div class="card-title">April 2026 — Payroll</div>
+          <button class="btn btn-red btn-sm">📄 PDF Generate</button>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Staff</th><th>Role</th><th>Basic</th><th>Overtime</th><th>Bonus</th><th>Late Cut</th><th>Absent Cut</th><th>Net</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Ahmed Khan</td><td>Chef</td><td>45,000</td><td>+2,500</td><td>+2,000</td><td>—</td><td>—</td><td><b style="color:var(--green)">49,500</b></td><td><span class="badge b-green">Paid</span></td></tr>
+            <tr><td>Sara Bibi</td><td>Cashier</td><td>22,000</td><td>—</td><td>+1,000</td><td>—</td><td>—</td><td><b style="color:var(--green)">23,000</b></td><td><span class="badge b-green">Paid</span></td></tr>
+            <tr><td>Ali Khan</td><td>Waiter</td><td>18,000</td><td>—</td><td>—</td><td>-900</td><td>—</td><td><b>17,100</b></td><td><span class="badge b-amber">Pending</span></td></tr>
+            <tr><td>Raza Hussain</td><td>Kitchen</td><td>20,000</td><td>+1,500</td><td>—</td><td>—</td><td>—</td><td><b style="color:var(--green)">21,500</b></td><td><span class="badge b-green">Paid</span></td></tr>
+            <tr><td>Fatima Noor</td><td>Waitress</td><td>18,000</td><td>—</td><td>—</td><td>—</td><td>-600</td><td><b>17,400</b></td><td><span class="badge b-amber">Pending</span></td></tr>
+            <tr><td>Bilal Ahmed</td><td>Guard</td><td>15,000</td><td>—</td><td>—</td><td>—</td><td>-1,500</td><td><b>13,500</b></td><td><span class="badge b-red">Hold</span></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- SHIFTS -->
     <div class="page" id="pg-shifts">
       <div class="card">
-        <div class="ch"><div class="ct">Weekly shift planner</div></div>
-        <div id="shift-table"><div class="loading">Shifts load ho rahi hain...</div></div>
-        <div style="margin-top:10px;font-size:10px;color:var(--gray);display:flex;gap:12px"><span>🟡 M=Morning</span><span>🔵 E=Evening</span><span>🟢 N=Night</span><span>⬛ Off=Day off</span></div>
+        <div class="card-head"><div class="card-title">Weekly Shift Planner — April 7–13, 2026</div><button class="btn btn-red btn-sm" onclick="saveShifts()">💾 Save Shifts</button></div>
+        <table class="tbl">
+          <thead><tr><th>Staff</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr></thead>
+          <tbody id="shift-tbody"></tbody>
+        </table>
+        <div style="margin-top:12px;font-size:12px;color:var(--gray);display:flex;gap:16px;flex-wrap:wrap">
+          <span>🟡 M = Morning (9am–5pm)</span>
+          <span>🔵 E = Evening (3pm–11pm)</span>
+          <span>🟢 N = Night (10pm–6am)</span>
+          <span>⬛ Off = Day off</span>
+        </div>
+        <div id="shift-saved-msg" style="display:none;margin-top:10px" class="alert alert-green">✅ Shifts saved successfully!</div>
+      </div>
+    </div>
+
+    <!-- BUDGET -->
+    <div class="page" id="pg-budget">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val">Rs 12.5L</div><div class="stat-lbl">Monthly target</div></div>
+        <div class="stat-card"><div class="stat-val">Rs 8.2L</div><div class="stat-lbl">Total budget</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">Rs 4.3L</div><div class="stat-lbl">Expected profit</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">34%</div><div class="stat-lbl">Profit margin</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><div class="card-title">April 2026 — Budget vs Actual</div></div>
+          <div id="budget-progs"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Budget set karen</div></div>
+          <div class="inp-group"><label class="inp-label">Category</label><select class="inp"><option>Ingredients / Raw Material</option><option>Staff Salaries</option><option>Rent & Utilities</option><option>Marketing</option><option>Maintenance</option><option>Miscellaneous</option></select></div>
+          <div class="inp-group"><label class="inp-label">Monthly Budget (Rs)</label><input class="inp" type="number" placeholder="e.g. 350000"></div>
+          <button class="btn btn-red" style="width:100%">Budget Update Karen</button>
+        </div>
       </div>
     </div>
 
     <!-- EXPENSES -->
     <div class="page" id="pg-expenses">
-      <div class="sr" id="exp-stats"></div>
-      <div class="tc">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val">Rs 24,500</div><div class="stat-lbl">Aaj ka kharcha</div></div>
+        <div class="stat-card"><div class="stat-val">Rs 1.82L</div><div class="stat-lbl">Is mahine</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">Rs 47,200</div><div class="stat-lbl">Aaj ki income</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">Rs 22,700</div><div class="stat-lbl">Net aaj</div></div>
+      </div>
+      <div class="two-col">
         <div class="card">
-          <div class="ct" style="margin-bottom:14px">Naya expense add karen</div>
-          <div class="ig"><label class="il">Item naam</label><input class="inp" id="e-item" placeholder="e.g. Chicken 10kg"></div>
-          <div class="fg2">
-            <div class="ig"><label class="il">Category</label>
-              <select class="inp" id="e-cat"><option>Ingredients</option><option>Utility</option><option>Operations</option><option>Marketing</option><option>Maintenance</option><option>Salary Advance</option></select>
-            </div>
-            <div class="ig"><label class="il">Amount (Rs)</label><input class="inp" id="e-amt" type="number" placeholder="0"></div>
+          <div class="card-head"><div class="card-title">Naya expense add karen</div></div>
+          <div class="inp-group"><label class="inp-label">Item</label><input class="inp" type="text" placeholder="e.g. Chicken 10kg"></div>
+          <div class="form-grid-2">
+            <div class="inp-group"><label class="inp-label">Category</label><select class="inp"><option>Ingredients</option><option>Utility</option><option>Operations</option><option>Marketing</option><option>Maintenance</option><option>Salary Advance</option></select></div>
+            <div class="inp-group"><label class="inp-label">Amount (Rs)</label><input class="inp" type="number" placeholder="0"></div>
           </div>
-          <div class="ig"><label class="il">Payment method</label>
-            <select class="inp" id="e-pay"><option>Cash</option><option>Bank Transfer</option><option>Cheque</option></select>
-          </div>
-          <button class="btn btn-r" style="width:100%" onclick="addExpense()">+ Expense Save Karen</button>
+          <div class="inp-group"><label class="inp-label">Payment method</label><select class="inp"><option>Cash</option><option>Bank Transfer</option><option>Cheque</option></select></div>
+          <button class="btn btn-red" style="width:100%" onclick="addExpense()">+ Expense Save Karen</button>
         </div>
         <div class="card">
-          <div class="ch"><div class="ct">Aaj ke expenses</div><button class="btn btn-o btn-sm" onclick="loadExpenses()">Refresh</button></div>
-          <div id="exp-table"><div class="loading">Load ho raha hai...</div></div>
+          <div class="card-head"><div class="card-title">Aaj ke expenses</div></div>
+          <table class="tbl" id="expense-tbl">
+            <thead><tr><th>Item</th><th>Cat</th><th>Amount</th></tr></thead>
+            <tbody id="expense-tbody"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
     <!-- REPORTS -->
     <div class="page" id="pg-reports">
-      <div class="sr" id="rep-stats"></div>
-      <div class="tc">
-        <div class="card"><div class="ch"><div class="ct">Monthly revenue 2026</div></div><div class="bc" id="monthly-bc"></div></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val">Rs 47.2k</div><div class="stat-lbl">Aaj</div></div>
+        <div class="stat-card"><div class="stat-val">Rs 3.1L</div><div class="stat-lbl">Is hafte</div></div>
+        <div class="stat-card"><div class="stat-val">Rs 12.4L</div><div class="stat-lbl">Is mahine</div></div>
+        <div class="stat-card"><div class="stat-val">Rs 1.38 Cr</div><div class="stat-lbl">Is saal</div></div>
+      </div>
+      <div class="two-col">
         <div class="card">
-          <div class="ct" style="margin-bottom:14px">Reports download karen</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="btn btn-o" style="text-align:left;font-size:12px" onclick="printReport('daily')">📊 Daily Sales Report</button>
-            <button class="btn btn-o" style="text-align:left;font-size:12px" onclick="printReport('orders')">🛒 Orders Report</button>
-            <button class="btn btn-o" style="text-align:left;font-size:12px" onclick="printReport('staff')">👥 Staff Report</button>
-            <button class="btn btn-o" style="text-align:left;font-size:12px" onclick="printReport('inventory')">📦 Inventory Report</button>
+          <div class="card-head"><div class="card-title">Monthly revenue — 2026</div></div>
+          <div class="bar-chart" id="monthly-chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Report download</div></div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+            <button class="btn btn-outline" style="text-align:left">📊 Daily Sales Report (PDF)</button>
+            <button class="btn btn-outline" style="text-align:left">📋 Monthly P&L Statement</button>
+            <button class="btn btn-outline" style="text-align:left">👥 Staff Performance Report</button>
+            <button class="btn btn-outline" style="text-align:left">📦 Inventory Usage Report</button>
+            <button class="btn btn-outline" style="text-align:left">🧾 Tax Summary (GST 5%)</button>
+            <button class="btn btn-outline" style="text-align:left">📈 Customer Visit Report</button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- CUSTOMERS -->
+    <div class="page" id="pg-customers">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val">1,284</div><div class="stat-lbl">Total customers</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--amber)">48</div><div class="stat-lbl">VIP customers</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">Rs 84,200</div><div class="stat-lbl">Avg monthly spend</div></div>
+        <div class="stat-card"><div class="stat-val">4.8 ★</div><div class="stat-lbl">Avg rating</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Customer list</div></div>
+        <table class="tbl">
+          <thead><tr><th>Naam</th><th>Phone</th><th>Total Visits</th><th>Total Spent</th><th>Last Visit</th><th>Type</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Hassan Ali</td><td>0300-111xxxx</td><td>47</td><td>Rs 82,400</td><td>Today</td><td><span class="badge b-amber">VIP</span></td><td><button class="btn btn-sm btn-outline">View</button></td></tr>
+            <tr><td>Zara Sheikh</td><td>0321-222xxxx</td><td>23</td><td>Rs 34,600</td><td>Yesterday</td><td><span class="badge b-blue">Regular</span></td><td><button class="btn btn-sm btn-outline">View</button></td></tr>
+            <tr><td>Tariq Mehmood</td><td>0311-333xxxx</td><td>8</td><td>Rs 12,100</td><td>3 days ago</td><td><span class="badge b-green">New</span></td><td><button class="btn btn-sm btn-outline">View</button></td></tr>
+            <tr><td>Amna Khalid</td><td>0345-444xxxx</td><td>31</td><td>Rs 48,200</td><td>1 week ago</td><td><span class="badge b-blue">Regular</span></td><td><button class="btn btn-sm btn-outline">View</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- SETTINGS -->
     <div class="page" id="pg-settings">
-      <div class="tc">
+      <div class="two-col">
         <div class="card">
-          <div class="ct" style="margin-bottom:14px">Restaurant info</div>
-          <div class="ig"><label class="il">Restaurant naam</label><input class="inp" value="SpiceHouse Restaurant"></div>
-          <div class="ig"><label class="il">Address</label><input class="inp" value="24-B MM Alam Road, Gulberg III, Lahore"></div>
-          <div class="fg2">
-            <div class="ig"><label class="il">Phone</label><input class="inp" value="042-111-77423"></div>
-            <div class="ig"><label class="il">WhatsApp</label><input class="inp" value="0300-7742301"></div>
+          <div class="card-title" style="margin-bottom:16px">Restaurant info</div>
+          <div class="inp-group"><label class="inp-label">Restaurant naam</label><input class="inp" value="SpiceHouse Restaurant"></div>
+          <div class="inp-group"><label class="inp-label">Address</label><input class="inp" value="24-B MM Alam Road, Gulberg III, Lahore"></div>
+          <div class="form-grid-2">
+            <div class="inp-group"><label class="inp-label">Phone</label><input class="inp" value="042-111-77423"></div>
+            <div class="inp-group"><label class="inp-label">WhatsApp</label><input class="inp" value="0300-7742301"></div>
           </div>
-          <div class="fg2">
-            <div class="ig"><label class="il">Tax rate (%)</label><input class="inp" type="number" value="5"></div>
-            <div class="ig"><label class="il">Supabase URL</label><input class="inp" id="s-url" value="" placeholder="https://xxx.supabase.co"></div>
+          <div class="form-grid-2">
+            <div class="inp-group"><label class="inp-label">Tax rate (%)</label><input class="inp" type="number" value="5"></div>
+            <div class="inp-group"><label class="inp-label">Currency</label><select class="inp"><option>PKR (Rs)</option></select></div>
           </div>
-          <div class="ig"><label class="il">Supabase Anon Key</label><input class="inp" id="s-key" placeholder="eyJ..."></div>
-          <button class="btn btn-r" style="width:100%" onclick="saveSettings()">Settings Save Karen</button>
+          <button class="btn btn-red" style="width:100%">Save Karen</button>
         </div>
         <div>
-          <div class="card">
-            <div class="ct" style="margin-bottom:12px">Database status</div>
-            <div id="db-status" class="al-a alert">⏳ Database connection check ho rahi hai...</div>
-            <button class="btn btn-o" style="width:100%;margin-top:8px" onclick="checkDB()">Connection Test Karen</button>
-          </div>
-          <div class="card" style="margin-top:12px">
-            <div class="ct" style="margin-bottom:12px">Quick links</div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <a href="index.html" target="_blank" class="btn btn-o" style="text-align:center;text-decoration:none;font-size:12px">🌐 Public Website</a>
-              <a href="https://supabase.com/dashboard" target="_blank" class="btn btn-o" style="text-align:center;text-decoration:none;font-size:12px">🗄️ Supabase Dashboard</a>
+          <div class="card" style="margin-bottom:0">
+            <div class="card-title" style="margin-bottom:14px">Opening hours</div>
+            <div class="form-grid-2">
+              <div class="inp-group"><label class="inp-label">Mon–Thu Open</label><input class="inp" value="11:00 AM"></div>
+              <div class="inp-group"><label class="inp-label">Mon–Thu Close</label><input class="inp" value="11:00 PM"></div>
+              <div class="inp-group"><label class="inp-label">Fri–Sat Open</label><input class="inp" value="11:00 AM"></div>
+              <div class="inp-group"><label class="inp-label">Fri–Sat Close</label><input class="inp" value="12:00 AM"></div>
             </div>
+            <button class="btn btn-red" style="width:100%">Hours Save Karen</button>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <div class="card-title" style="margin-bottom:14px">User permissions</div>
+            <table class="tbl">
+              <thead><tr><th>Role</th><th>Access</th></tr></thead>
+              <tbody>
+                <tr><td>Owner</td><td><span class="badge b-green">Full Access</span></td></tr>
+                <tr><td>Manager</td><td><span class="badge b-blue">Orders + Staff</span></td></tr>
+                <tr><td>Cashier</td><td><span class="badge b-gray">Billing Only</span></td></tr>
+                <tr><td>Waiter</td><td><span class="badge b-gray">Orders Only</span></td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -325,366 +592,602 @@ tr:hover td{background:rgba(0,0,0,.01);}
 </div>
 
 <!-- MODALS -->
-<div class="mo" id="mo-new-order"><div class="mb">
-  <button class="mc2" onclick="closeMo('new-order')">✕</button>
-  <div class="mt">Naya Order</div>
-  <div class="ig"><label class="il">Order type</label><select class="inp" id="no-type"><option value="dine-in">Dine In</option><option value="takeaway">Takeaway</option><option value="delivery">Delivery</option></select></div>
-  <div class="ig"><label class="il">Table (Dine In)</label><select class="inp" id="no-table"><option value="">Select table</option></select></div>
-  <div class="ig"><label class="il">Customer naam</label><input class="inp" id="no-name" placeholder="Walk-in customer"></div>
-  <div class="ig"><label class="il">Phone</label><input class="inp" id="no-phone" placeholder="0300-xxx"></div>
-  <div class="ig"><label class="il">Items (comma separated)</label><input class="inp" id="no-items" placeholder="Chicken Biryani x2, Naan x4"></div>
-  <div class="ig"><label class="il">Total amount (Rs)</label><input class="inp" id="no-total" type="number" placeholder="0"></div>
-  <button class="btn btn-r" style="width:100%;margin-top:4px" onclick="createOrder()">Order Create Karen</button>
-</div></div>
+<div class="modal-bg" id="modal-add-staff">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('add-staff')">✕</button>
+    <div class="modal-title">Add New Staff Member</div>
+    <div class="form-grid-2">
+      <div class="inp-group"><label class="inp-label">Full Name</label><input class="inp" id="ns-name" placeholder="Full name"></div>
+      <div class="inp-group"><label class="inp-label">Phone</label><input class="inp" id="ns-phone" placeholder="0300-0000000"></div>
+      <div class="inp-group"><label class="inp-label">CNIC</label><input class="inp" id="ns-cnic" placeholder="35202-xxxxxxx-x"></div>
+      <div class="inp-group"><label class="inp-label">Role</label><select class="inp" id="ns-role"><option>Head Chef</option><option>Chef</option><option>Kitchen Staff</option><option>Waiter</option><option>Waitress</option><option>Cashier</option><option>Manager</option><option>Guard</option><option>Cleaner</option></select></div>
+      <div class="inp-group"><label class="inp-label">Basic Salary (Rs)</label><input class="inp" id="ns-salary" type="number" placeholder="18000"></div>
+      <div class="inp-group"><label class="inp-label">Join Date</label><input class="inp" id="ns-date" type="date"></div>
+    </div>
+    <div class="inp-group"><label class="inp-label">Address</label><input class="inp" id="ns-addr" placeholder="Home address"></div>
+    <button class="btn btn-red" style="width:100%;margin-top:4px" onclick="saveNewStaff()">Save Staff</button>
+  </div>
+</div>
 
-<div class="mo" id="mo-new-res"><div class="mb">
-  <button class="mc2" onclick="closeMo('new-res')">✕</button>
-  <div class="mt">Nai Reservation</div>
-  <div class="fg2">
-    <div class="ig"><label class="il">Customer naam</label><input class="inp" id="rn" placeholder="Naam"></div>
-    <div class="ig"><label class="il">Phone</label><input class="inp" id="rp" placeholder="0300-xxx"></div>
-    <div class="ig"><label class="il">Date</label><input class="inp" id="rd" type="date"></div>
-    <div class="ig"><label class="il">Time</label><input class="inp" id="rt" type="time"></div>
-    <div class="ig"><label class="il">Guests</label><input class="inp" id="rg" type="number" placeholder="4"></div>
-    <div class="ig"><label class="il">Table</label><select class="inp" id="rtb"><option>T1</option><option>T2</option><option>T3</option><option>T4</option><option>VIP Hall</option></select></div>
+<!-- EDIT STAFF MODAL -->
+<div class="modal-bg" id="modal-edit-staff">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('edit-staff')">✕</button>
+    <div class="modal-title">Edit Staff Member</div>
+    <input type="hidden" id="es-index">
+    <div class="form-grid-2">
+      <div class="inp-group"><label class="inp-label">Full Name</label><input class="inp" id="es-name"></div>
+      <div class="inp-group"><label class="inp-label">Phone</label><input class="inp" id="es-phone"></div>
+      <div class="inp-group"><label class="inp-label">CNIC</label><input class="inp" id="es-cnic"></div>
+      <div class="inp-group"><label class="inp-label">Role</label><select class="inp" id="es-role"><option>Head Chef</option><option>Chef</option><option>Kitchen Staff</option><option>Waiter</option><option>Waitress</option><option>Cashier</option><option>Manager</option><option>Guard</option><option>Cleaner</option></select></div>
+      <div class="inp-group"><label class="inp-label">Basic Salary (Rs)</label><input class="inp" id="es-salary" type="number"></div>
+      <div class="inp-group"><label class="inp-label">Join Date</label><input class="inp" id="es-date" type="date"></div>
+      <div class="inp-group"><label class="inp-label">Status</label><select class="inp" id="es-status"><option>Active</option><option>Warning</option><option>Half Day</option><option>Leave</option></select></div>
+    </div>
+    <div class="inp-group"><label class="inp-label">Address</label><input class="inp" id="es-addr"></div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-red" style="flex:1" onclick="updateStaff()">Save Changes</button>
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('edit-staff')">Cancel</button>
+    </div>
   </div>
-  <div class="ig"><label class="il">Special request</label><input class="inp" id="rsr" placeholder="Birthday, window seat..."></div>
-  <button class="btn btn-r" style="width:100%;margin-top:4px" onclick="createReservation()">Booking Confirm Karen</button>
-</div></div>
+</div>
 
-<div class="mo" id="mo-new-staff"><div class="mb">
-  <button class="mc2" onclick="closeMo('new-staff')">✕</button>
-  <div class="mt">Naya Staff Add Karen</div>
-  <div class="fg2">
-    <div class="ig"><label class="il">Naam</label><input class="inp" id="sn" placeholder="Full naam"></div>
-    <div class="ig"><label class="il">Phone</label><input class="inp" id="sph" placeholder="0300-xxx"></div>
-    <div class="ig"><label class="il">Role</label><select class="inp" id="sr2"><option>Head Chef</option><option>Chef</option><option>Kitchen Staff</option><option>Waiter</option><option>Waitress</option><option>Cashier</option><option>Manager</option><option>Guard</option></select></div>
-    <div class="ig"><label class="il">Basic Salary</label><input class="inp" id="ss" type="number" placeholder="18000"></div>
-    <div class="ig"><label class="il">Join Date</label><input class="inp" id="sjd" type="date"></div>
-    <div class="ig"><label class="il">CNIC</label><input class="inp" id="sc2" placeholder="35202-xxxxxxx-x"></div>
+<div class="modal-bg" id="modal-add-order">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('add-order')">✕</button>
+    <div class="modal-title">New Order</div>
+    <div class="form-grid-2">
+      <div class="inp-group"><label class="inp-label">Order Type</label><select class="inp" id="no-type"><option>Dine In</option><option>Takeaway</option><option>Delivery</option></select></div>
+      <div class="inp-group"><label class="inp-label">Table (Dine In)</label><select class="inp" id="no-table"><option>T1</option><option>T2</option><option>T3</option><option>T4</option><option>T5</option></select></div>
+    </div>
+    <div class="inp-group"><label class="inp-label">Customer Name (optional)</label><input class="inp" id="no-cust" placeholder="Walk-in customer"></div>
+    <div class="inp-group"><label class="inp-label">Items (comma separated)</label><input class="inp" id="no-items" placeholder="Chicken Biryani x2, Naan x4"></div>
+    <div class="inp-group"><label class="inp-label">Amount (Rs)</label><input class="inp" id="no-amt" type="number" placeholder="0"></div>
+    <button class="btn btn-red" style="width:100%;margin-top:4px" onclick="createOrder()">Create Order</button>
   </div>
-  <button class="btn btn-r" style="width:100%;margin-top:4px" onclick="addStaff()">Staff Save Karen</button>
-</div></div>
+</div>
 
-<div class="mo" id="mo-new-item"><div class="mb">
-  <button class="mc2" onclick="closeMo('new-item')">✕</button>
-  <div class="mt">Menu Item Add Karen</div>
-  <div class="ig"><label class="il">Item naam</label><input class="inp" id="mi-n" placeholder="e.g. Chicken Biryani"></div>
-  <div class="fg2">
-    <div class="ig"><label class="il">Category</label><select class="inp" id="mi-cat"></select></div>
-    <div class="ig"><label class="il">Price (Rs)</label><input class="inp" id="mi-p" type="number" placeholder="350"></div>
+<!-- ADD MENU ITEM MODAL -->
+<div class="modal-bg" id="modal-add-item">
+  <div class="modal-box" style="width:520px">
+    <button class="modal-close" onclick="closeModal('add-item')">✕</button>
+    <div class="modal-title">Add New Menu Item</div>
+    <div class="form-grid-2">
+      <div class="inp-group"><label class="inp-label">Item Name</label><input class="inp" id="ni-name" placeholder="e.g. Chicken Biryani"></div>
+      <div class="inp-group"><label class="inp-label">Category</label><select class="inp" id="ni-cat"><option>Biryani</option><option>BBQ</option><option>Karahi</option><option>Drinks</option><option>Bread</option><option>Desserts</option></select></div>
+      <div class="inp-group"><label class="inp-label">Price (Rs)</label><input class="inp" id="ni-price" type="number" placeholder="350"></div>
+      <div class="inp-group"><label class="inp-label">Cost Price (Rs)</label><input class="inp" id="ni-cost" type="number" placeholder="140"></div>
+    </div>
+    <div class="inp-group"><label class="inp-label">Description</label><input class="inp" id="ni-desc" placeholder="Short description of the dish"></div>
+    <!-- PHOTO SECTION -->
+    <div class="inp-group">
+      <label class="inp-label">Food Photo</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn btn-outline btn-sm" onclick="togglePhotoMode('upload')" id="btn-photo-upload" style="border-color:var(--red);color:var(--red)">📁 Upload Image</button>
+        <button class="btn btn-outline btn-sm" onclick="togglePhotoMode('url')" id="btn-photo-url">🔗 Image URL</button>
+      </div>
+      <div id="photo-upload-area">
+        <input type="file" id="ni-photo-file" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+        <div onclick="document.getElementById('ni-photo-file').click()" style="border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;color:var(--gray);font-size:13px;transition:border 0.2s" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'" id="upload-dropzone">
+          <div style="font-size:28px;margin-bottom:6px">📷</div>
+          Click to select image (JPG, PNG, WEBP)
+        </div>
+      </div>
+      <div id="photo-url-area" style="display:none">
+        <input class="inp" id="ni-photo-url" placeholder="https://images.unsplash.com/..." oninput="previewPhotoUrl(this.value)">
+      </div>
+      <div id="photo-preview" style="display:none;margin-top:10px">
+        <img id="photo-preview-img" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--gray);margin-top:4px">✅ Photo ready</div>
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div class="inp-group"><label class="inp-label">Available?</label><select class="inp" id="ni-avail"><option value="Yes">Yes</option><option value="No">No</option></select></div>
+      <div class="inp-group"><label class="inp-label">Bestseller?</label><select class="inp" id="ni-best"><option value="No">No</option><option value="Yes">Yes — Top Seller</option></select></div>
+    </div>
+    <button class="btn btn-red" style="width:100%;margin-top:4px" onclick="saveNewMenuItem()">Save Menu Item</button>
   </div>
-  <div class="ig"><label class="il">Description</label><input class="inp" id="mi-d" placeholder="Short description"></div>
-  <div class="ig"><label class="il">Icon (emoji)</label><input class="inp" id="mi-i" placeholder="🍛" value="🍛"></div>
-  <div style="display:flex;gap:12px;margin-bottom:12px">
-    <label style="font-size:12px;display:flex;align-items:center;gap:5px"><input type="checkbox" id="mi-bs"> Bestseller</label>
-    <label style="font-size:12px;display:flex;align-items:center;gap:5px"><input type="checkbox" id="mi-sp"> Spicy</label>
-    <label style="font-size:12px;display:flex;align-items:center;gap:5px"><input type="checkbox" id="mi-vg"> Veg</label>
-  </div>
-  <button class="btn btn-r" style="width:100%" onclick="addMenuItem()">Item Save Karen</button>
-</div></div>
+</div>
 
-<div class="mo" id="mo-new-inv"><div class="mb">
-  <button class="mc2" onclick="closeMo('new-inv')">✕</button>
-  <div class="mt">Stock Add Karen</div>
-  <div class="ig"><label class="il">Item naam</label><input class="inp" id="iv-n" placeholder="e.g. Chicken"></div>
-  <div class="fg2">
-    <div class="ig"><label class="il">Category</label><select class="inp" id="iv-cat"><option>Meat</option><option>Grain</option><option>Vegetable</option><option>Spice</option><option>Ingredient</option><option>Fat</option></select></div>
-    <div class="ig"><label class="il">Current Stock</label><input class="inp" id="iv-s" type="number" placeholder="10"></div>
-    <div class="ig"><label class="il">Unit</label><select class="inp" id="iv-u"><option>kg</option><option>L</option><option>pieces</option><option>dozen</option></select></div>
-    <div class="ig"><label class="il">Min Level</label><input class="inp" id="iv-m" type="number" placeholder="5"></div>
+<!-- EDIT MENU ITEM MODAL -->
+<div class="modal-bg" id="modal-edit-item">
+  <div class="modal-box" style="width:520px">
+    <button class="modal-close" onclick="closeModal('edit-item')">✕</button>
+    <div class="modal-title">Edit Menu Item</div>
+    <input type="hidden" id="ei-index">
+    <div class="form-grid-2">
+      <div class="inp-group"><label class="inp-label">Item Name</label><input class="inp" id="ei-name"></div>
+      <div class="inp-group"><label class="inp-label">Category</label><select class="inp" id="ei-cat"><option>Biryani</option><option>BBQ</option><option>Karahi</option><option>Drinks</option><option>Bread</option><option>Desserts</option></select></div>
+      <div class="inp-group"><label class="inp-label">Price (Rs)</label><input class="inp" id="ei-price" type="number"></div>
+      <div class="inp-group"><label class="inp-label">Cost Price (Rs)</label><input class="inp" id="ei-cost" type="number"></div>
+    </div>
+    <div class="inp-group"><label class="inp-label">Description</label><input class="inp" id="ei-desc"></div>
+    <div class="inp-group">
+      <label class="inp-label">Food Photo</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn btn-outline btn-sm" onclick="togglePhotoModeEdit('upload')" id="btn-photo-upload-e" style="border-color:var(--red);color:var(--red)">📁 Upload Image</button>
+        <button class="btn btn-outline btn-sm" onclick="togglePhotoModeEdit('url')" id="btn-photo-url-e">🔗 Image URL</button>
+      </div>
+      <div id="photo-upload-area-e">
+        <input type="file" id="ei-photo-file" accept="image/*" style="display:none" onchange="previewPhotoEdit(this)">
+        <div onclick="document.getElementById('ei-photo-file').click()" style="border:2px dashed var(--border);border-radius:8px;padding:16px;text-align:center;cursor:pointer;color:var(--gray);font-size:13px" id="upload-dropzone-e">📷 Click to change image</div>
+      </div>
+      <div id="photo-url-area-e" style="display:none">
+        <input class="inp" id="ei-photo-url" placeholder="https://..." oninput="previewPhotoUrlEdit(this.value)">
+      </div>
+      <div id="photo-preview-e" style="margin-top:10px">
+        <img id="photo-preview-img-e" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div class="inp-group"><label class="inp-label">Available?</label><select class="inp" id="ei-avail"><option value="Yes">Yes</option><option value="No">No</option></select></div>
+      <div class="inp-group"><label class="inp-label">Bestseller?</label><select class="inp" id="ei-best"><option value="No">No</option><option value="Yes">Yes — Top Seller</option></select></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-red" style="flex:1" onclick="updateMenuItem()">Save Changes</button>
+      <button class="btn btn-outline" style="flex:1;color:var(--red);border-color:var(--red)" onclick="deleteMenuItem()">🗑 Delete Item</button>
+    </div>
   </div>
-  <button class="btn btn-r" style="width:100%" onclick="addInventory()">Stock Save Karen</button>
-</div></div>
+</div>
 
-<div class="mo" id="mo-new-att"><div class="mb">
-  <button class="mc2" onclick="closeMo('new-att')">✕</button>
-  <div class="mt">Attendance Mark Karen</div>
-  <div class="ig"><label class="il">Staff</label><select class="inp" id="at-staff"></select></div>
-  <div class="fg2">
-    <div class="ig"><label class="il">Status</label><select class="inp" id="at-st"><option value="present">Present</option><option value="absent">Absent</option><option value="late">Late</option><option value="half-day">Half Day</option><option value="holiday">Holiday</option></select></div>
-    <div class="ig"><label class="il">Check In</label><input class="inp" id="at-in" type="time"></div>
-    <div class="ig"><label class="il">Late minutes</label><input class="inp" id="at-lm" type="number" placeholder="0"></div>
-    <div class="ig"><label class="il">Date</label><input class="inp" id="at-date" type="date"></div>
+<div class="modal-bg" id="modal-add-reservation">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('add-reservation')">✕</button>
+    <div class="modal-title">New Reservation</div>
+    <div class="form-grid-2">
+      <div class="inp-group"><label class="inp-label">Customer Name</label><input class="inp" placeholder="Name"></div>
+      <div class="inp-group"><label class="inp-label">Phone</label><input class="inp" placeholder="0300-xxx"></div>
+      <div class="inp-group"><label class="inp-label">Date</label><input class="inp" type="date"></div>
+      <div class="inp-group"><label class="inp-label">Time</label><input class="inp" type="time"></div>
+      <div class="inp-group"><label class="inp-label">Guests</label><input class="inp" type="number" placeholder="4"></div>
+      <div class="inp-group"><label class="inp-label">Table</label><select class="inp"><option>T1</option><option>T2</option><option>T3</option><option>T4</option><option>VIP Hall</option></select></div>
+    </div>
+    <button class="btn btn-red" style="width:100%;margin-top:4px">Confirm Booking</button>
   </div>
-  <div class="ig"><label class="il">Notes</label><input class="inp" id="at-note" placeholder="Optional note"></div>
-  <button class="btn btn-r" style="width:100%" onclick="markAttendance()">Save Karen</button>
-</div></div>
+</div>
 
 <script>
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+// ─── NAV ───────────────────────────────────────────────
+const pageTitles = {dashboard:'Dashboard',orders:'Orders',tables:'Table Manager',reservations:'Reservations',menu:'Menu Manager',inventory:'Inventory',staff:'Staff List',attendance:'Attendance',salary:'Salary & Payroll',shifts:'Shift Planner',budget:'Budget Planner',expenses:'Daily Expenses',reports:'Sales Reports',customers:'Customer List',settings:'Settings'};
 
-// ── UTILS ──
-function toast2(msg, type='ok') {
-  const t = document.getElementById('toast2');
-  t.textContent = msg;
-  t.style.background = type==='err'?'#7B241C':'#1A6B3C';
-  t.classList.add('show');
-  clearTimeout(t._t);
-  t._t = setTimeout(()=>t.classList.remove('show'), 2500);
-}
-
-const pgTitles = {dashboard:'Dashboard',orders:'Orders',tables:'Tables',reservations:'Reservations',menu:'Menu Manager',inventory:'Inventory',staff:'Staff List',attendance:'Attendance',salary:'Salary',shifts:'Shifts',expenses:'Expenses',reports:'Reports',settings:'Settings'};
-
-function nav(id, el) {
+function nav(id, el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.si').forEach(i=>i.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   document.getElementById('pg-'+id).classList.add('active');
   if(el) el.classList.add('active');
-  document.getElementById('pg-title').textContent = pgTitles[id]||id;
-  loadPage(id);
+  document.getElementById('page-title').textContent = pageTitles[id] || id;
+  if(id==='orders') renderOrdersTable();
+  if(id==='menu') renderMenuTable();
+  if(id==='staff') renderStaffTable();
 }
 
-function openMo(id){document.getElementById('mo-'+id).classList.add('open');}
-function closeMo(id){document.getElementById('mo-'+id).classList.remove('open');}
-document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
-
-function statCard(val, lbl, color='', icon='', change='') {
-  return `<div class="sc"><div class="sc-top"><div class="si2" style="background:${icon?'rgba(192,57,43,.1)':'#F5F0EB'}">${icon}</div>${change?`<span class="sc-ch ${change.startsWith('+')?'cu':'cd'}">${change}</span>`:''}</div><div class="sc-v" ${color?`style="color:${color}"`:''}>${val}</div><div class="sc-l">${lbl}</div></div>`;
+// ─── CLOCK ─────────────────────────────────────────────
+function updateClock(){
+  const now = new Date();
+  document.getElementById('live-clock').textContent = now.toLocaleDateString('en-PK',{weekday:'short',day:'numeric',month:'short'}) + ' — ' + now.toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'});
 }
+updateClock(); setInterval(updateClock, 1000);
 
-function badgeHTML(status) {
-  const m = {pending:'ba Pending',cooking:'ba Cooking',ready:'bb2 Ready',delivered:'bg Done',cancelled:'br Cancelled',confirmed:'bg Confirmed',active:'bg Active',leave:'ba Leave',warning:'ba Warning',paid:'bg Paid',hold:'br Hold',available:'bg Available',occupied:'br Occupied',reserved:'ba Reserved'};
-  const parts = (m[status]||'bgr '+status).split(' ');
-  return `<span class="bdg ${parts[0]}">${parts[1]||status}</span>`;
-}
+// ─── CHARTS ────────────────────────────────────────────
+const weekData = [{d:'Mon',v:38},{d:'Tue',v:42},{d:'Wed',v:35},{d:'Thu',v:51},{d:'Fri',v:47},{d:'Sat',v:0},{d:'Sun',v:0}];
+const maxW = Math.max(...weekData.map(x=>x.v));
+document.getElementById('week-chart').innerHTML = weekData.map(x=>`
+  <div class="bar-col">
+    <div class="bar-val">${x.v?'Rs '+x.v+'k':''}</div>
+    <div class="bar-fill" style="height:${x.v?Math.round(x.v/maxW*90):4}px;background:${x.d==='Thu'?'#185FA5':x.d==='Fri'?'#1D9E75':'#C0392B'}"></div>
+    <div class="bar-label">${x.d}</div>
+  </div>`).join('');
 
-// ── CLOCK ──
-function updateClk(){document.getElementById('clk').textContent=new Date().toLocaleDateString('en-PK',{weekday:'short',day:'numeric',month:'short'})+' '+new Date().toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'});}
-updateClk(); setInterval(updateClk,1000);
+const topItems = [{n:'Chicken Biryani',v:52,pct:85},{n:'Chicken Karahi',v:38,pct:62},{n:'Seekh Kabab',v:31,pct:50},{n:'Mix Grill',v:24,pct:39},{n:'Lassi',v:19,pct:30}];
+document.getElementById('top-items').innerHTML = topItems.map(i=>`
+  <div class="prog-row">
+    <div class="prog-label"><span>${i.n}</span><span>${i.v} orders</span></div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${i.pct}%;background:#C0392B"></div></div>
+  </div>`).join('');
 
-// ── LOAD PAGE ──
-function loadPage(id) {
-  const fn = {dashboard:loadDash,orders:loadOrders,tables:loadTables,reservations:loadReservations,menu:loadMenu,inventory:loadInventory,staff:loadStaff,attendance:loadAttend,salary:loadSalary,shifts:loadShifts,expenses:loadExpenses,reports:loadReports,settings:()=>checkDB()};
-  if(fn[id]) fn[id]();
-}
+const monthData = [{d:'Jan',v:98},{d:'Feb',v:112},{d:'Mar',v:135},{d:'Apr',v:51}];
+const maxM = Math.max(...monthData.map(x=>x.v));
+document.getElementById('monthly-chart').innerHTML = monthData.map(x=>`
+  <div class="bar-col">
+    <div class="bar-val">Rs ${x.v}k</div>
+    <div class="bar-fill" style="height:${Math.round(x.v/maxM*90)}px;background:${x.d==='Mar'?'#185FA5':x.d==='Apr'?'#1D9E75':'#C0392B'}"></div>
+    <div class="bar-label">${x.d}</div>
+  </div>`).join('');
 
-// ── DASHBOARD ──
-async function loadDash() {
-  const today = new Date().toISOString().split('T')[0];
-  const [{data:orders},{data:staff},{data:inv}] = await Promise.all([
-    db.from('orders').select('*').gte('created_at',today),
-    db.from('staff').select('*'),
-    db.from('inventory').select('*')
-  ]);
-  const revenue = (orders||[]).reduce((s,o)=>s+(o.total||0),0);
-  const pending = (orders||[]).filter(o=>o.status==='pending'||o.status==='cooking').length;
-  document.getElementById('ob').textContent = pending;
-  document.getElementById('dash-stats').innerHTML =
-    statCard('Rs '+revenue.toLocaleString(),'Aaj ki revenue','','💰','+12%') +
-    statCard((orders||[]).length,'Aaj ke orders','','🛒') +
-    statCard((staff||[]).filter(s=>s.status==='active').length+'/'+(staff||[]).length,'Staff active','','👥') +
-    statCard(pending,'Pending orders','var(--am)','🍳');
-  const critInv = (inv||[]).filter(i=>i.current_stock<=i.min_level);
-  document.getElementById('dash-alerts').innerHTML = critInv.map(i=>`<div class="alert al-r">⚠️ ${i.name} stock low — sirf ${i.current_stock}${i.unit} bacha!</div>`).join('') +
-    (pending?`<div class="alert al-a">🔥 ${pending} orders kitchen mein pending hain</div>`:'');
-  const wk = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const wkv = [38,42,35,51,47,0,0];
-  const mx = Math.max(...wkv);
-  document.getElementById('week-bc').innerHTML = wk.map((d,i)=>`<div class="bcol"><div class="bv">${wkv[i]?'Rs '+wkv[i]+'k':''}</div><div class="bf2" style="height:${wkv[i]?Math.round(wkv[i]/mx*90):3}px;background:${i===3?'var(--bl)':i===4?'var(--gr)':'var(--red)'}"></div><div class="bl2">${d}</div></div>`).join('');
-  const topItems = [{n:'Chicken Biryani',v:52,p:85},{n:'Karahi',v:38,p:62},{n:'Seekh Kabab',v:31,p:50},{n:'Mix Grill',v:24,p:39}];
-  document.getElementById('top-items-dash').innerHTML = topItems.map(i=>`<div class="pr"><div class="pl"><span>${i.n}</span><span>${i.v} orders</span></div><div class="pb"><div class="pf" style="width:${i.p}%;background:var(--red)"></div></div></div>`).join('');
-  const recentOrders = (orders||[]).slice(-5).reverse();
-  document.getElementById('recent-orders-dash').innerHTML = `<table><thead><tr><th>#</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody>${recentOrders.map(o=>`<tr><td>#${o.order_number||'—'}</td><td>${o.order_type}</td><td>Rs ${(o.total||0).toLocaleString()}</td><td>${badgeHTML(o.status)}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:#999">Koi order nahi</td></tr>'}</tbody></table>`;
-  document.getElementById('attend-dash').innerHTML = `<table><thead><tr><th>Staff</th><th>Status</th></tr></thead><tbody>${(staff||[]).slice(0,5).map(s=>`<tr><td>${s.name}</td><td>${badgeHTML(s.status==='active'?'present':'absent')}</td></tr>`).join('')}</tbody></table>`;
+// ─── TABLE MAP ─────────────────────────────────────────
+const tableStates = {T1:'occ',T2:'free',T3:'occ',T4:'res',T5:'occ',T6:'free',T7:'occ',T8:'free',T9:'occ',T10:'res',T11:'free',T12:'occ',T13:'occ',T14:'free',T15:'occ',T16:'free',T17:'occ',T18:'free',T19:'res',T20:'free'};
+const stateLabel = {occ:'Occupied',free:'Available',res:'Reserved'};
+const stateClass = {occ:'tmap-occ',free:'tmap-free',res:'tmap-res'};
+document.getElementById('table-map').innerHTML = Object.entries(tableStates).map(([t,s])=>`
+  <div class="tmap-cell ${stateClass[s]}" onclick="toggleTable('${t}')" id="tm-${t}">
+    ${t}<div class="tmap-sub">${stateLabel[s]}</div>
+  </div>`).join('');
+
+function toggleTable(t){
+  const states=['occ','free','res'];
+  const el = document.getElementById('tm-'+t);
+  const next = states[(states.indexOf(tableStates[t])+1)%3];
+  tableStates[t]=next;
+  el.className='tmap-cell '+stateClass[next];
+  el.innerHTML=t+'<div class="tmap-sub">'+stateLabel[next]+'</div>';
 }
 
-// ── ORDERS ──
-let allOrders=[];
-async function loadOrders() {
-  const {data} = await db.from('orders').select('*').order('created_at',{ascending:false});
-  allOrders = data||[];
-  const pend=allOrders.filter(o=>o.status==='pending').length, cook=allOrders.filter(o=>o.status==='cooking').length, done=allOrders.filter(o=>o.status==='delivered').length;
-  document.getElementById('orders-stats').innerHTML = statCard(allOrders.length,'Total','','🛒')+statCard(pend,'Pending','var(--am)','⏳')+statCard(cook,'Cooking','var(--bl)','🔥')+statCard(done,'Done','var(--gr)','✅');
-  renderOrdersTable(allOrders);
-}
-function filterOrders(){const f=document.getElementById('order-filter').value;renderOrdersTable(f?allOrders.filter(o=>o.status===f):allOrders);}
-function renderOrdersTable(orders){
-  document.getElementById('orders-table').innerHTML=`<table><thead><tr><th>#</th><th>Type</th><th>Table</th><th>Customer</th><th>Total</th><th>Time</th><th>Status</th><th>Action</th></tr></thead><tbody>${orders.map(o=>`<tr><td>#${o.order_number||'—'}</td><td>${o.order_type}</td><td>${o.table_number||'—'}</td><td>${o.customer_name||'Walk-in'}</td><td>Rs ${(o.total||0).toLocaleString()}</td><td>${new Date(o.created_at).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</td><td>${badgeHTML(o.status)}</td><td style="display:flex;gap:4px">${o.status==='pending'?`<button class="btn btn-sm" style="background:var(--am);color:#fff;font-size:10px" onclick="updOrder('${o.id}','cooking')">Cook</button>`:''}${o.status==='cooking'?`<button class="btn btn-sm" style="background:var(--gr);color:#fff;font-size:10px" onclick="updOrder('${o.id}','ready')">Ready</button>`:''}${o.status==='ready'?`<button class="btn btn-sm" style="background:var(--bl);color:#fff;font-size:10px" onclick="updOrder('${o.id}','delivered')">Done</button>`:''}${o.status!=='cancelled'&&o.status!=='delivered'?`<button class="btn btn-sm btn-o" style="font-size:10px" onclick="updOrder('${o.id}','cancelled')">✕</button>`:''}</td></tr>`).join('')||'<tr><td colspan="8" style="text-align:center;color:#999">Koi order nahi</td></tr>'}</tbody></table>`;
-}
-async function updOrder(id,status){const{error}=await db.from('orders').update({status,updated_at:new Date()}).eq('id',id);if(!error){toast2('Order status update ho gaya');loadOrders();}else toast2('Error: '+error.message,'err');}
-async function createOrder(){
-  const type=document.getElementById('no-type').value, tbl=document.getElementById('no-table').value, name=document.getElementById('no-name').value, phone=document.getElementById('no-phone').value, items=document.getElementById('no-items').value, total=parseFloat(document.getElementById('no-total').value)||0;
-  const {error}=await db.from('orders').insert({order_type:type,table_number:tbl,customer_name:name,customer_phone:phone,items:[{name:items}],total,status:'pending'});
-  if(!error){toast2('Order create ho gaya!');closeMo('new-order');loadOrders();}else toast2('Error','err');
+// ─── ORDERS — receives from website via localStorage ───
+let ordersData = [
+  {n:'#0183',type:'Dine In T3',items:'Biryani x2, Naan x4',cust:'Walk-in',amt:'Rs 820',time:'2:45 PM',status:'Cooking',sc:'b-amber'},
+  {n:'#0182',type:'Delivery',items:'Karahi, Roti x3',cust:'Hassan Ali',amt:'Rs 560',time:'2:30 PM',status:'On Way',sc:'b-blue'},
+  {n:'#0181',type:'Takeaway',items:'Mix Grill, Lassi',cust:'Walk-in',amt:'Rs 730',time:'2:15 PM',status:'Done',sc:'b-green'},
+  {n:'#0180',type:'Dine In T7',items:'Tikka x3, Naan x6',cust:'Zara Sheikh',amt:'Rs 1,290',time:'2:00 PM',status:'Done',sc:'b-green'},
+  {n:'#0179',type:'Delivery',items:'Biryani x1, Drink',cust:'Tariq M.',amt:'Rs 410',time:'1:45 PM',status:'Done',sc:'b-green'},
+];
+
+// Pull orders from website (localStorage key: spicehouse_orders)
+function loadOrdersFromWebsite(){
+  try {
+    const raw = localStorage.getItem('spicehouse_orders');
+    if(raw){
+      const webOrders = JSON.parse(raw);
+      webOrders.forEach(wo => {
+        const exists = ordersData.find(o => o.n === wo.n);
+        if(!exists) ordersData.unshift(wo);
+      });
+    }
+  } catch(e){}
 }
 
-// ── TABLES ──
-async function loadTables(){
-  const {data}=await db.from('restaurant_tables').select('*').order('table_number');
-  const tables=data||[];
-  const occ=tables.filter(t=>t.status==='occupied').length, free=tables.filter(t=>t.status==='available').length, res=tables.filter(t=>t.status==='reserved').length;
-  document.getElementById('tables-stats').innerHTML=statCard(occ,'Occupied','var(--red)','🟥')+statCard(free,'Available','var(--gr)','🟩')+statCard(res,'Reserved','var(--am)','🟨')+statCard(tables.length,'Total','','🪑');
-  document.getElementById('table-map').innerHTML=tables.map(t=>{const cls=t.status==='occupied'?'tocc':t.status==='reserved'?'tres':'tfre';return `<div class="tc2 ${cls}" onclick="toggleTbl('${t.id}','${t.status}')" id="tbl-${t.id}">${t.table_number}<div style="font-size:9px;font-weight:400;margin-top:2px">${t.status==='occupied'?'Occupied':t.status==='reserved'?'Reserved':'Available'}</div></div>`}).join('');
-}
-async function toggleTbl(id,cur){const next=cur==='available'?'occupied':cur==='occupied'?'reserved':'available';const{error}=await db.from('restaurant_tables').update({status:next}).eq('id',id);if(!error)loadTables();}
-
-// ── RESERVATIONS ──
-async function loadReservations(){
-  const {data}=await db.from('reservations').select('*').order('reservation_date').order('reservation_time');
-  document.getElementById('res-table').innerHTML=`<table><thead><tr><th>Customer</th><th>Phone</th><th>Date</th><th>Time</th><th>Guests</th><th>Request</th><th>Status</th><th>Action</th></tr></thead><tbody>${(data||[]).map(r=>`<tr><td>${r.customer_name}</td><td>${r.customer_phone}</td><td>${r.reservation_date}</td><td>${r.reservation_time}</td><td>${r.guests}</td><td>${r.special_request||'—'}</td><td>${badgeHTML(r.status)}</td><td style="display:flex;gap:4px">${r.status==='pending'?`<button class="btn btn-sm" style="background:var(--gr);color:#fff;font-size:10px" onclick="updRes('${r.id}','confirmed')">Confirm</button>`:''}${r.status!=='cancelled'?`<button class="btn btn-sm btn-o" style="font-size:10px" onclick="updRes('${r.id}','cancelled')">✕</button>`:''}</td></tr>`).join('')||'<tr><td colspan="8" style="text-align:center;color:#999">Koi reservation nahi</td></tr>'}</tbody></table>`;
-}
-async function updRes(id,status){const{error}=await db.from('reservations').update({status}).eq('id',id);if(!error){toast2('Reservation update ho gaya');loadReservations();}else toast2('Error','err');}
-async function createReservation(){
-  const n=document.getElementById('rn').value,p=document.getElementById('rp').value,d=document.getElementById('rd').value,t=document.getElementById('rt').value,g=document.getElementById('rg').value,tbl=document.getElementById('rtb').value,sr=document.getElementById('rsr').value;
-  if(!n||!p||!d||!t){toast2('Sab fields fill karen','err');return;}
-  const{error}=await db.from('reservations').insert({customer_name:n,customer_phone:p,reservation_date:d,reservation_time:t,guests:parseInt(g)||2,table_number:tbl,special_request:sr,status:'pending'});
-  if(!error){toast2('Reservation save ho gayi!');closeMo('new-res');loadReservations();}else toast2('Error','err');
+function renderOrdersTable(){
+  loadOrdersFromWebsite();
+  const active = ordersData.filter(o=>o.status!=='Done').length;
+  document.getElementById('order-badge').textContent = active || '';
+  document.getElementById('orders-tbody').innerHTML = ordersData.map((o,i)=>`
+    <tr>
+      <td>${o.n}</td><td>${o.type}</td>
+      <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.items}</td>
+      <td>${o.cust}</td><td>${o.amt}</td><td>${o.time}</td>
+      <td>
+        <select class="inp" style="padding:4px 8px;font-size:12px;width:auto" onchange="changeOrderStatus(${i},this.value)">
+          <option ${o.status==='Cooking'?'selected':''}>Cooking</option>
+          <option ${o.status==='On Way'?'selected':''}>On Way</option>
+          <option ${o.status==='Ready'?'selected':''}>Ready</option>
+          <option ${o.status==='Done'?'selected':''}>Done</option>
+        </select>
+      </td>
+      <td><button class="btn btn-sm btn-outline" onclick="viewOrder(${i})">View</button></td>
+    </tr>`).join('');
 }
 
-// ── MENU ──
-let menuCats=[];
-async function loadMenu(){
-  const[{data:cats},{data:items}]=await Promise.all([db.from('categories').select('*').order('sort_order'),db.from('menu_items').select('*,categories(name)').order('sort_order')]);
-  menuCats=cats||[];
-  document.getElementById('mi-cat').innerHTML=(cats||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  document.getElementById('menu-table').innerHTML=`<table><thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Available</th><th>Bestseller</th><th>Action</th></tr></thead><tbody>${(items||[]).map(i=>`<tr><td>${i.icon} ${i.name}</td><td>${i.categories?.name||''}</td><td>Rs ${i.price}</td><td>${badgeHTML(i.is_available?'available':'cancelled')}</td><td>${i.is_bestseller?'⭐':'—'}</td><td style="display:flex;gap:4px"><button class="btn btn-sm btn-o" onclick="toggleItem('${i.id}',${i.is_available})">${i.is_available?'Hide':'Show'}</button><button class="btn btn-sm btn-o" style="color:var(--red)" onclick="delItem('${i.id}')">Del</button></td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:#999">Menu load karne mein masla</td></tr>'}</tbody></table>`;
-}
-async function toggleItem(id,cur){await db.from('menu_items').update({is_available:!cur}).eq('id',id);loadMenu();}
-async function delItem(id){if(!confirm('Item delete karna chahte hain?'))return;await db.from('menu_items').delete().eq('id',id);toast2('Item delete ho gaya');loadMenu();}
-async function addMenuItem(){
-  const n=document.getElementById('mi-n').value,cat=document.getElementById('mi-cat').value,p=parseFloat(document.getElementById('mi-p').value),d=document.getElementById('mi-d').value,i=document.getElementById('mi-i').value,bs=document.getElementById('mi-bs').checked,sp=document.getElementById('mi-sp').checked,vg=document.getElementById('mi-vg').checked;
-  if(!n||!cat||!p){toast2('Naam, category aur price zaruri hain','err');return;}
-  const{error}=await db.from('menu_items').insert({name:n,category_id:cat,price:p,description:d,icon:i||'🍽️',is_bestseller:bs,is_spicy:sp,is_veg:vg});
-  if(!error){toast2('Item add ho gaya!');closeMo('new-item');loadMenu();}else toast2('Error','err');
+function changeOrderStatus(i, val){
+  ordersData[i].status = val;
+  ordersData[i].sc = val==='Done'?'b-green':val==='On Way'?'b-blue':val==='Ready'?'b-green':'b-amber';
 }
 
-// ── INVENTORY ──
-async function loadInventory(){
-  const{data}=await db.from('inventory').select('*').order('name');
-  const critical=(data||[]).filter(i=>i.current_stock<=i.min_level);
-  document.getElementById('inv-alerts').innerHTML=critical.map(i=>`<div class="alert al-r">⚠️ ${i.name} — sirf ${i.current_stock}${i.unit} bacha (min: ${i.min_level}${i.unit})</div>`).join('');
-  document.getElementById('inv-table').innerHTML=`<table><thead><tr><th>Item</th><th>Category</th><th>Stock</th><th>Min Level</th><th>Status</th><th>Action</th></tr></thead><tbody>${(data||[]).map(i=>{const crit=i.current_stock<=i.min_level;return `<tr><td>${i.name}</td><td>${i.category}</td><td>${i.current_stock} ${i.unit}</td><td>${i.min_level} ${i.unit}</td><td>${badgeHTML(crit?'cancelled':'available')}</td><td style="display:flex;gap:4px"><button class="btn btn-sm btn-o" onclick="updInv('${i.id}')">Update</button><button class="btn btn-sm btn-o" style="color:var(--red)" onclick="delInv('${i.id}')">Del</button></td></tr>`}).join('')}</tbody></table>`;
-}
-async function updInv(id){const s=prompt('New stock value enter karen:');if(!s)return;const{error}=await db.from('inventory').update({current_stock:parseFloat(s),updated_at:new Date()}).eq('id',id);if(!error){toast2('Stock update ho gaya');loadInventory();}else toast2('Error','err');}
-async function delInv(id){if(!confirm('Delete karna chahte hain?'))return;await db.from('inventory').delete().eq('id',id);toast2('Deleted');loadInventory();}
-async function addInventory(){
-  const n=document.getElementById('iv-n').value,cat=document.getElementById('iv-cat').value,s=parseFloat(document.getElementById('iv-s').value),u=document.getElementById('iv-u').value,m=parseFloat(document.getElementById('iv-m').value)||5;
-  if(!n||!s){toast2('Naam aur stock zaruri hain','err');return;}
-  const{error}=await db.from('inventory').insert({name:n,category:cat,current_stock:s,unit:u,min_level:m});
-  if(!error){toast2('Stock add ho gaya!');closeMo('new-inv');loadInventory();}else toast2('Error','err');
+function viewOrder(i){
+  const o = ordersData[i];
+  alert(`Order ${o.n}\nType: ${o.type}\nCustomer: ${o.cust}\nItems: ${o.items}\nAmount: ${o.amt}\nTime: ${o.time}\nStatus: ${o.status}`);
 }
 
-// ── STAFF ──
-async function loadStaff(){
-  const{data}=await db.from('staff').select('*').order('name');
-  const act=(data||[]).filter(s=>s.status==='active').length, leave=(data||[]).filter(s=>s.status==='leave').length;
-  const payroll=(data||[]).reduce((s,x)=>s+(x.basic_salary||0),0);
-  document.getElementById('staff-stats').innerHTML=statCard((data||[]).length,'Total staff','','👥')+statCard(act,'Active','var(--gr)','✅')+statCard(leave,'On leave','var(--am)','🏖️')+statCard('Rs '+payroll.toLocaleString(),'Monthly payroll','','💰');
-  document.getElementById('staff-table').innerHTML=`<table><thead><tr><th>Naam</th><th>Role</th><th>Phone</th><th>Salary</th><th>Join Date</th><th>Status</th><th>Action</th></tr></thead><tbody>${(data||[]).map(s=>`<tr><td><div style="display:flex;align-items:center;gap:7px"><div style="width:26px;height:26px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">${s.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>${s.name}</div></td><td>${s.role}</td><td>${s.phone||'—'}</td><td>Rs ${(s.basic_salary||0).toLocaleString()}</td><td>${s.join_date||'—'}</td><td>${badgeHTML(s.status)}</td><td><button class="btn btn-sm btn-o" onclick="delStaff('${s.id}')">Del</button></td></tr>`).join('')}</tbody></table>`;
-  document.getElementById('at-staff').innerHTML=(data||[]).map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
-}
-async function addStaff(){
-  const n=document.getElementById('sn').value,ph=document.getElementById('sph').value,r=document.getElementById('sr2').value,sal=parseFloat(document.getElementById('ss').value)||0,jd=document.getElementById('sjd').value,cn=document.getElementById('sc2').value;
-  if(!n||!r){toast2('Naam aur role zaruri hain','err');return;}
-  const{error}=await db.from('staff').insert({name:n,phone:ph,role:r,basic_salary:sal,join_date:jd||null,cnic:cn,status:'active'});
-  if(!error){toast2('Staff add ho gaya!');closeMo('new-staff');loadStaff();}else toast2('Error','err');
-}
-async function delStaff(id){if(!confirm('Staff delete karna chahte hain?'))return;await db.from('staff').delete().eq('id',id);toast2('Staff delete ho gaya');loadStaff();}
-
-// ── ATTENDANCE ──
-async function loadAttend(){
-  const today=new Date().toISOString().split('T')[0];
-  const[{data:att},{data:staff}]=await Promise.all([db.from('attendance').select('*,staff(name,role)').eq('date',today),db.from('staff').select('*')]);
-  const pres=(att||[]).filter(a=>a.status==='present').length, abs=(att||[]).filter(a=>a.status==='absent').length, late=(att||[]).filter(a=>a.status==='late').length;
-  document.getElementById('att-stats').innerHTML=statCard(pres,'Present','var(--gr)')+statCard(abs,'Absent','var(--red)')+statCard(late,'Late','var(--am)')+statCard((staff||[]).length,'Total staff');
-  document.getElementById('att-table').innerHTML=`<table><thead><tr><th>Staff</th><th>Role</th><th>Check In</th><th>Status</th><th>Notes</th></tr></thead><tbody>${att&&att.length?att.map(a=>`<tr><td>${a.staff?.name||'—'}</td><td>${a.staff?.role||'—'}</td><td>${a.check_in||'—'}</td><td>${badgeHTML(a.status)}</td><td>${a.notes||'—'}</td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:#999">Aaj ki attendance record nahi — Mark Attendance button use karen</td></tr>'}</tbody></table>`;
-}
-async function markAttendance(){
-  const sid=document.getElementById('at-staff').value,st=document.getElementById('at-st').value,ci=document.getElementById('at-in').value,lm=parseInt(document.getElementById('at-lm').value)||0,dt=document.getElementById('at-date').value||new Date().toISOString().split('T')[0],note=document.getElementById('at-note').value;
-  const{error}=await db.from('attendance').upsert({staff_id:sid,date:dt,status:st,check_in:ci||null,late_minutes:lm,notes:note},{onConflict:'staff_id,date'});
-  if(!error){toast2('Attendance mark ho gayi!');closeMo('new-att');loadAttend();}else toast2('Error: '+error.message,'err');
+function createOrder(){
+  const type = document.getElementById('no-type').value;
+  const table = document.getElementById('no-table').value;
+  const cust = document.getElementById('no-cust').value || 'Walk-in';
+  const items = document.getElementById('no-items').value;
+  const amt = document.getElementById('no-amt').value;
+  if(!items){ alert('Please enter items'); return; }
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'});
+  const num = '#0' + (parseInt(ordersData[0].n.replace('#',''))+1);
+  ordersData.unshift({n:num, type:type==='Dine In'?`Dine In ${table}`:type, items, cust, amt:`Rs ${amt||0}`, time, status:'Cooking', sc:'b-amber'});
+  closeModal('add-order');
+  renderOrdersTable();
 }
 
-// ── SALARY ──
-async function loadSalary(){
-  const{data:staff}=await db.from('staff').select('*');
-  const m=new Date().getMonth()+1, y=new Date().getFullYear();
-  const{data:sal}=await db.from('salary_records').select('*,staff(name,role)').eq('month',m).eq('year',y);
-  const total=(staff||[]).reduce((s,x)=>s+(x.basic_salary||0),0);
-  const paid=(sal||[]).filter(s=>s.status==='paid').reduce((s,x)=>s+(x.net_salary||0),0);
-  document.getElementById('sal-stats').innerHTML=statCard('Rs '+total.toLocaleString(),'Gross payroll')+statCard((sal||[]).filter(s=>s.status==='paid').length+'/'+((staff||[]).length),'Paid/Total')+statCard('Rs '+paid.toLocaleString(),'Amount paid','var(--gr)')+statCard((sal||[]).filter(s=>s.status==='pending').length,'Pending');
-  document.getElementById('sal-table').innerHTML=`<table><thead><tr><th>Staff</th><th>Role</th><th>Basic</th><th>Bonus</th><th>Deduction</th><th>Net</th><th>Status</th><th>Action</th></tr></thead><tbody>${(staff||[]).map(s=>{const rec=(sal||[]).find(r=>r.staff_id===s.id);const net=rec?rec.net_salary:s.basic_salary;return `<tr><td>${s.name}</td><td>${s.role}</td><td>Rs ${(s.basic_salary||0).toLocaleString()}</td><td>Rs ${(rec?.bonus||0).toLocaleString()}</td><td>Rs ${((rec?.late_deduction||0)+(rec?.absent_deduction||0)).toLocaleString()}</td><td><b>Rs ${(net||0).toLocaleString()}</b></td><td>${badgeHTML(rec?.status||'pending')}</td><td>${(!rec||rec.status==='pending')?`<button class="btn btn-sm btn-r" onclick="paySalary('${s.id}','${m}','${y}',${s.basic_salary})">Pay</button>`:''}</td></tr>`}).join('')}</tbody></table>`;
-}
-async function genSalary(){
-  const{data:staff}=await db.from('staff').select('*');
-  const m=new Date().getMonth()+1, y=new Date().getFullYear();
-  const records=(staff||[]).map(s=>({staff_id:s.id,month:m,year:y,basic:s.basic_salary||0,net_salary:s.basic_salary||0,status:'pending'}));
-  await db.from('salary_records').upsert(records,{onConflict:'staff_id,month,year'});
-  toast2('Payroll generate ho gaya!');loadSalary();
-}
-async function paySalary(sid,m,y,basic){
-  const{error}=await db.from('salary_records').upsert({staff_id:sid,month:parseInt(m),year:parseInt(y),basic,net_salary:basic,status:'paid',paid_at:new Date()},{onConflict:'staff_id,month,year'});
-  if(!error){toast2('Salary mark paid!');loadSalary();}else toast2('Error','err');
+// Poll for new orders from website every 10 seconds
+setInterval(()=>{ if(document.getElementById('pg-orders').classList.contains('active')) renderOrdersTable(); }, 10000);
+
+// ─── MENU MANAGER ──────────────────────────────────────
+let menuItems = [
+  {name:'Chicken Biryani', cat:'Biryani', price:350, cost:140, desc:'Dum-cooked with aromatic spices', avail:'Yes', best:'Yes', photo:'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=80&q=60&auto=format&fit=crop'},
+  {name:'Beef Biryani',    cat:'Biryani', price:420, cost:180, desc:'Slow-cooked tender beef',          avail:'Yes', best:'No',  photo:'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=80&q=60&auto=format&fit=crop'},
+  {name:'Seekh Kabab',     cat:'BBQ',     price:280, cost:110, desc:'Charcoal grilled minced beef',      avail:'Yes', best:'Yes', photo:'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=80&q=60&auto=format&fit=crop'},
+  {name:'Chicken Tikka',   cat:'BBQ',     price:380, cost:150, desc:'Marinated tandoor chicken',         avail:'No',  best:'No',  photo:'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=80&q=60&auto=format&fit=crop'},
+  {name:'Chicken Karahi',  cat:'Karahi',  price:450, cost:190, desc:'Lahori style desi ghee karahi',     avail:'Yes', best:'Yes', photo:'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=80&q=60&auto=format&fit=crop'},
+  {name:'Sweet Lassi',     cat:'Drinks',  price:80,  cost:20,  desc:'Chilled yogurt with rose water',    avail:'Yes', best:'No',  photo:'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=80&q=60&auto=format&fit=crop'},
+];
+
+function renderMenuTable(){
+  document.getElementById('menu-count').textContent = menuItems.length;
+  document.getElementById('menu-tbody').innerHTML = menuItems.map((item,i)=>{
+    const margin = Math.round((item.price-item.cost)/item.price*100);
+    const photoHtml = item.photo
+      ? `<img src="${item.photo}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">`
+      : `<div style="width:44px;height:44px;border-radius:6px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px">🍽️</div>`;
+    return `<tr>
+      <td>${photoHtml}</td>
+      <td><b>${item.name}</b><div style="font-size:11px;color:var(--gray)">${item.desc}</div></td>
+      <td><span class="badge b-gray">${item.cat}</span></td>
+      <td>Rs ${item.price}</td>
+      <td>Rs ${item.cost}</td>
+      <td><span style="color:var(--green);font-weight:600">${margin}%</span></td>
+      <td><span class="badge ${item.avail==='Yes'?'b-green':'b-red'}">${item.avail}</span></td>
+      <td><button class="btn btn-sm btn-outline" onclick="openEditMenuItem(${i})">✏️ Edit</button></td>
+    </tr>`;
+  }).join('');
 }
 
-// ── SHIFTS ──
-async function loadShifts(){
-  const{data:staff}=await db.from('staff').select('*');
-  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const shiftColors={M:'ba',E:'bb2',N:'bg',Off:'bgr'};
-  const defaultShifts=[['M','M','M','M','M','Off','Off'],['E','E','Off','E','E','E','E'],['M','M','M','M','Off','M','M'],['N','N','N','Off','N','N','N'],['M','Off','M','M','M','Off','M'],['E','E','E','E','Off','E','E']];
-  document.getElementById('shift-table').innerHTML=`<table><thead><tr><th>Staff</th>${days.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>${(staff||[]).map((s,i)=>`<tr><td>${s.name}</td>${(defaultShifts[i%defaultShifts.length]).map(sh=>`<td><span class="bdg ${shiftColors[sh]}">${sh}</span></td>`).join('')}</tr>`).join('')}</tbody></table>`;
+// Add menu item
+let newPhotoData = '';
+function togglePhotoMode(mode){
+  document.getElementById('photo-upload-area').style.display = mode==='upload'?'block':'none';
+  document.getElementById('photo-url-area').style.display   = mode==='url'?'block':'none';
+  document.getElementById('btn-photo-upload').style.borderColor = mode==='upload'?'var(--red)':'var(--border)';
+  document.getElementById('btn-photo-upload').style.color   = mode==='upload'?'var(--red)':'var(--dark)';
+  document.getElementById('btn-photo-url').style.borderColor    = mode==='url'?'var(--red)':'var(--border)';
+  document.getElementById('btn-photo-url').style.color      = mode==='url'?'var(--red)':'var(--dark)';
+}
+function previewPhoto(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    newPhotoData = e.target.result;
+    document.getElementById('photo-preview-img').src = newPhotoData;
+    document.getElementById('photo-preview').style.display = 'block';
+    document.getElementById('upload-dropzone').innerHTML = '✅ '+file.name;
+  };
+  reader.readAsDataURL(file);
+}
+function previewPhotoUrl(url){
+  if(!url) return;
+  newPhotoData = url;
+  document.getElementById('photo-preview-img').src = url;
+  document.getElementById('photo-preview').style.display = 'block';
+}
+function saveNewMenuItem(){
+  const name = document.getElementById('ni-name').value.trim();
+  const price = parseInt(document.getElementById('ni-price').value)||0;
+  if(!name){ alert('Please enter item name'); return; }
+  const urlVal = document.getElementById('ni-photo-url').value.trim();
+  const photo = newPhotoData || urlVal || '';
+  menuItems.push({
+    name, cat:document.getElementById('ni-cat').value,
+    price, cost:parseInt(document.getElementById('ni-cost').value)||0,
+    desc:document.getElementById('ni-desc').value,
+    avail:document.getElementById('ni-avail').value,
+    best:document.getElementById('ni-best').value,
+    photo
+  });
+  newPhotoData='';
+  document.getElementById('photo-preview').style.display='none';
+  document.getElementById('ni-name').value=''; document.getElementById('ni-price').value='';
+  document.getElementById('ni-cost').value=''; document.getElementById('ni-desc').value='';
+  document.getElementById('ni-photo-url').value='';
+  document.getElementById('upload-dropzone').innerHTML='<div style="font-size:28px;margin-bottom:6px">📷</div>Click to select image (JPG, PNG, WEBP)';
+  closeModal('add-item');
+  renderMenuTable();
 }
 
-// ── EXPENSES ──
-async function loadExpenses(){
-  const today=new Date().toISOString().split('T')[0];
-  const{data}=await db.from('expenses').select('*').eq('expense_date',today).order('created_at',{ascending:false});
-  const total=(data||[]).reduce((s,e)=>s+(e.amount||0),0);
-  document.getElementById('exp-stats').innerHTML=statCard('Rs '+total.toLocaleString(),'Aaj ka kharcha')+statCard((data||[]).length,'Items aaj')+statCard('Rs 47,200','Aaj ki income','var(--gr)')+statCard('Rs '+(47200-total).toLocaleString(),'Net aaj','var(--gr)');
-  document.getElementById('exp-table').innerHTML=`<table><thead><tr><th>Item</th><th>Category</th><th>Amount</th><th>Del</th></tr></thead><tbody>${(data||[]).map(e=>`<tr><td>${e.item}</td><td><span class="bdg bgr">${e.category}</span></td><td>Rs ${(e.amount||0).toLocaleString()}</td><td><button class="btn btn-sm btn-o" style="color:var(--red)" onclick="delExp('${e.id}')">✕</button></td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:#999">Koi expense nahi</td></tr>'}</tbody></table>`;
+// Edit menu item
+let editPhotoData = '';
+function openEditMenuItem(i){
+  const item = menuItems[i];
+  document.getElementById('ei-index').value = i;
+  document.getElementById('ei-name').value  = item.name;
+  document.getElementById('ei-cat').value   = item.cat;
+  document.getElementById('ei-price').value = item.price;
+  document.getElementById('ei-cost').value  = item.cost;
+  document.getElementById('ei-desc').value  = item.desc;
+  document.getElementById('ei-avail').value = item.avail;
+  document.getElementById('ei-best').value  = item.best;
+  editPhotoData = item.photo || '';
+  const prevImg = document.getElementById('photo-preview-img-e');
+  if(item.photo){ prevImg.src = item.photo; prevImg.style.display='block'; }
+  else { prevImg.style.display='none'; }
+  openModal('edit-item');
 }
-async function addExpense(){
-  const item=document.getElementById('e-item').value, cat=document.getElementById('e-cat').value, amt=parseFloat(document.getElementById('e-amt').value), pay=document.getElementById('e-pay').value;
-  if(!item||!amt){toast2('Item naam aur amount zaruri hain','err');return;}
-  const{error}=await db.from('expenses').insert({item,category:cat,amount:amt,payment_method:pay});
-  if(!error){toast2('Expense add ho gaya!');document.getElementById('e-item').value='';document.getElementById('e-amt').value='';loadExpenses();}else toast2('Error','err');
+function togglePhotoModeEdit(mode){
+  document.getElementById('photo-upload-area-e').style.display = mode==='upload'?'block':'none';
+  document.getElementById('photo-url-area-e').style.display    = mode==='url'?'block':'none';
+  document.getElementById('btn-photo-upload-e').style.borderColor = mode==='upload'?'var(--red)':'var(--border)';
+  document.getElementById('btn-photo-upload-e').style.color    = mode==='upload'?'var(--red)':'var(--dark)';
+  document.getElementById('btn-photo-url-e').style.borderColor = mode==='url'?'var(--red)':'var(--border)';
+  document.getElementById('btn-photo-url-e').style.color       = mode==='url'?'var(--red)':'var(--dark)';
 }
-async function delExp(id){await db.from('expenses').delete().eq('id',id);toast2('Deleted');loadExpenses();}
-
-// ── REPORTS ──
-async function loadReports(){
-  const today=new Date().toISOString().split('T')[0];
-  const{data:orders}=await db.from('orders').select('total,created_at');
-  const todayRev=(orders||[]).filter(o=>o.created_at?.startsWith(today)).reduce((s,o)=>s+(o.total||0),0);
-  const totalRev=(orders||[]).reduce((s,o)=>s+(o.total||0),0);
-  document.getElementById('rep-stats').innerHTML=statCard('Rs '+todayRev.toLocaleString(),'Aaj')+statCard('Rs '+totalRev.toLocaleString(),'All time')+statCard((orders||[]).length,'Total orders')+statCard('~34%','Profit margin','var(--gr)');
-  const months=['Jan','Feb','Mar','Apr'];
-  const mvals=[98,112,135,51];
-  const mx=Math.max(...mvals);
-  document.getElementById('monthly-bc').innerHTML=months.map((m,i)=>`<div class="bcol"><div class="bv">Rs ${mvals[i]}k</div><div class="bf2" style="height:${Math.round(mvals[i]/mx*90)}px;background:${i===2?'var(--bl)':i===3?'var(--gr)':'var(--red)'}"></div><div class="bl2">${m}</div></div>`).join('');
+function previewPhotoEdit(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    editPhotoData = e.target.result;
+    const img = document.getElementById('photo-preview-img-e');
+    img.src = editPhotoData; img.style.display='block';
+    document.getElementById('upload-dropzone-e').innerHTML='✅ '+file.name;
+  };
+  reader.readAsDataURL(file);
 }
-function printReport(type){toast2(`${type} report generate ho rahi hai... (Print feature real database se aayega)`);}
-
-// ── SETTINGS ──
-async function checkDB(){
-  const el=document.getElementById('db-status');
-  el.className='alert al-a';el.textContent='⏳ Connection check ho rahi hai...';
-  try{const{data,error}=await db.from('categories').select('count').limit(1);
-  if(error)throw error;
-  el.className='alert al-g';el.textContent='✅ Database connected! Supabase sahi kaam kar raha hai.';}
-  catch(e){el.className='alert al-r';el.textContent='❌ Connection fail. Apni Supabase URL aur Key check karen.';}
+function previewPhotoUrlEdit(url){
+  if(!url) return;
+  editPhotoData = url;
+  const img = document.getElementById('photo-preview-img-e');
+  img.src = url; img.style.display='block';
 }
-function saveSettings(){toast2('Settings save ho gayi!');}
+function updateMenuItem(){
+  const i = parseInt(document.getElementById('ei-index').value);
+  const urlVal = document.getElementById('ei-photo-url').value.trim();
+  menuItems[i] = {
+    name:  document.getElementById('ei-name').value,
+    cat:   document.getElementById('ei-cat').value,
+    price: parseInt(document.getElementById('ei-price').value)||0,
+    cost:  parseInt(document.getElementById('ei-cost').value)||0,
+    desc:  document.getElementById('ei-desc').value,
+    avail: document.getElementById('ei-avail').value,
+    best:  document.getElementById('ei-best').value,
+    photo: editPhotoData || urlVal || menuItems[i].photo || ''
+  };
+  editPhotoData='';
+  closeModal('edit-item');
+  renderMenuTable();
+}
+function deleteMenuItem(){
+  const i = parseInt(document.getElementById('ei-index').value);
+  if(confirm(`Delete "${menuItems[i].name}"?`)){ menuItems.splice(i,1); closeModal('edit-item'); renderMenuTable(); }
+}
 
-// ── REALTIME ──
-db.channel('admin-orders').on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},()=>{
-  const ob=document.getElementById('ob');
-  ob.textContent=parseInt(ob.textContent||0)+1;
-  toast2('🆕 Naya order aaya!');
-  if(document.getElementById('pg-orders').classList.contains('active')) loadOrders();
-  if(document.getElementById('pg-dashboard').classList.contains('active')) loadDash();
-}).subscribe();
+// ─── STAFF ─────────────────────────────────────────────
+let staffData = [
+  {init:'AK',color:'var(--red)',   name:'Ahmed Khan',  role:'Head Chef',     phone:'0300-1234567',cnic:'35202-xxx',salary:45000,join:'Jan 2022',status:'Active', addr:''},
+  {init:'SB',color:'var(--blue)',  name:'Sara Bibi',   role:'Cashier',       phone:'0311-9876543',cnic:'35202-yyy',salary:22000,join:'Mar 2023',status:'Active', addr:''},
+  {init:'AK',color:'var(--amber)', name:'Ali Khan',    role:'Waiter',        phone:'0333-5556667',cnic:'35202-zzz',salary:18000,join:'Jun 2023',status:'Warning',addr:''},
+  {init:'RH',color:'var(--green)', name:'Raza Hussain',role:'Kitchen Staff', phone:'0321-4445556',cnic:'35202-aaa',salary:20000,join:'Aug 2022',status:'Active', addr:''},
+  {init:'FN',color:'#8E44AD',      name:'Fatima Noor', role:'Waitress',      phone:'0345-7778889',cnic:'35202-bbb',salary:18000,join:'Feb 2024',status:'Half Day',addr:''},
+  {init:'BA',color:'var(--gray)',  name:'Bilal Ahmed', role:'Guard',         phone:'0312-3334445',cnic:'35202-ccc',salary:15000,join:'Nov 2021',status:'Leave',  addr:''},
+];
 
-db.channel('admin-res').on('postgres_changes',{event:'INSERT',schema:'public',table:'reservations'},()=>{
-  toast2('📅 Nai reservation aayi!');
-  if(document.getElementById('pg-reservations').classList.contains('active')) loadReservations();
-}).subscribe();
+const statusBadge = {Active:'b-green',Warning:'b-amber','Half Day':'b-blue',Leave:'b-red'};
 
-// ── INIT ──
-loadDash();
+function renderStaffTable(){
+  document.getElementById('staff-tbody').innerHTML = staffData.map((s,i)=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:${s.color};display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:600">${s.init}</div>
+        ${s.name}
+      </div></td>
+      <td>${s.role}</td><td>${s.phone}</td><td>${s.cnic}</td>
+      <td>Rs ${s.salary.toLocaleString()}</td><td>${s.join}</td>
+      <td><span class="badge ${statusBadge[s.status]||'b-gray'}">${s.status}</span></td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-outline" onclick="openEditStaff(${i})">✏️ Edit</button>
+        <button class="btn btn-sm" style="background:#FDEDEC;color:var(--red);border:none;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600" onclick="deleteStaff(${i})">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openEditStaff(i){
+  const s = staffData[i];
+  document.getElementById('es-index').value  = i;
+  document.getElementById('es-name').value   = s.name;
+  document.getElementById('es-phone').value  = s.phone;
+  document.getElementById('es-cnic').value   = s.cnic;
+  document.getElementById('es-role').value   = s.role;
+  document.getElementById('es-salary').value = s.salary;
+  document.getElementById('es-date').value   = '';
+  document.getElementById('es-status').value = s.status;
+  document.getElementById('es-addr').value   = s.addr||'';
+  openModal('edit-staff');
+}
+function updateStaff(){
+  const i = parseInt(document.getElementById('es-index').value);
+  staffData[i].name   = document.getElementById('es-name').value;
+  staffData[i].phone  = document.getElementById('es-phone').value;
+  staffData[i].cnic   = document.getElementById('es-cnic').value;
+  staffData[i].role   = document.getElementById('es-role').value;
+  staffData[i].salary = parseInt(document.getElementById('es-salary').value)||staffData[i].salary;
+  staffData[i].status = document.getElementById('es-status').value;
+  staffData[i].addr   = document.getElementById('es-addr').value;
+  staffData[i].init   = staffData[i].name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  closeModal('edit-staff');
+  renderStaffTable();
+}
+function deleteStaff(i){
+  if(confirm(`Remove ${staffData[i].name} from staff?`)){ staffData.splice(i,1); renderStaffTable(); }
+}
+function saveNewStaff(){
+  const name = document.getElementById('ns-name').value.trim();
+  if(!name){ alert('Please enter name'); return; }
+  staffData.push({
+    init: name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2),
+    color:'var(--blue)', name,
+    role:   document.getElementById('ns-role').value,
+    phone:  document.getElementById('ns-phone').value,
+    cnic:   document.getElementById('ns-cnic').value,
+    salary: parseInt(document.getElementById('ns-salary').value)||0,
+    join:   new Date().toLocaleDateString('en-PK',{month:'short',year:'numeric'}),
+    status: 'Active',
+    addr:   document.getElementById('ns-addr').value
+  });
+  closeModal('add-staff');
+  renderStaffTable();
+}
+
+// Staff tbody reference fix
+document.querySelector('#pg-staff .tbl tbody') && (document.querySelector('#pg-staff .tbl tbody').id = 'staff-tbody');
+
+// ─── SHIFTS (EDITABLE) ─────────────────────────────────
+const shiftStaff = ['Ahmed Khan','Ali Khan','Sara Bibi','Raza Hussain','Fatima Noor','Bilal Ahmed'];
+let shiftData = [
+  ['M','M','M','M','M','Off','Off'],
+  ['E','E','Off','E','E','E','E'],
+  ['M','M','M','M','Off','M','M'],
+  ['N','N','N','Off','N','N','N'],
+  ['M','Off','M','M','M','Off','M'],
+  ['E','E','E','E','Off','E','E']
+];
+const shiftColor = {M:'b-amber',E:'b-blue',N:'b-green',Off:'b-gray'};
+const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+function renderShiftTable(){
+  document.getElementById('shift-tbody').innerHTML = shiftStaff.map((s,si)=>`
+    <tr>
+      <td><b>${s}</b></td>
+      ${days.map((d,di)=>`
+        <td>
+          <select class="inp" style="padding:4px 6px;font-size:12px;width:68px;font-weight:600;
+            background:${shiftData[si][di]==='M'?'#FEF9E7':shiftData[si][di]==='E'?'#D6EAF8':shiftData[si][di]==='N'?'#D5F5E3':'#F2F3F4'};
+            color:${shiftData[si][di]==='M'?'#784212':shiftData[si][di]==='E'?'#1A5276':shiftData[si][di]==='N'?'#1A6B3C':'#515A5A'};
+            border:none;border-radius:6px"
+            onchange="updateShift(${si},${di},this.value);this.style.background=this.value==='M'?'#FEF9E7':this.value==='E'?'#D6EAF8':this.value==='N'?'#D5F5E3':'#F2F3F4';this.style.color=this.value==='M'?'#784212':this.value==='E'?'#1A5276':this.value==='N'?'#1A6B3C':'#515A5A'">
+            <option ${shiftData[si][di]==='M'?'selected':''} value="M">M</option>
+            <option ${shiftData[si][di]==='E'?'selected':''} value="E">E</option>
+            <option ${shiftData[si][di]==='N'?'selected':''} value="N">N</option>
+            <option ${shiftData[si][di]==='Off'?'selected':''} value="Off">Off</option>
+          </select>
+        </td>`).join('')}
+    </tr>`).join('');
+}
+
+function updateShift(si,di,val){ shiftData[si][di]=val; }
+
+function saveShifts(){
+  const msg = document.getElementById('shift-saved-msg');
+  msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',3000);
+}
+
+// ─── BUDGET ────────────────────────────────────────────
+const budgets = [{cat:'Ingredients',budget:350000,actual:280000},{cat:'Salaries',budget:320000,actual:316100},{cat:'Rent & Utilities',budget:80000,actual:62000},{cat:'Marketing',budget:40000,actual:28000},{cat:'Maintenance',budget:30000,actual:18000}];
+document.getElementById('budget-progs').innerHTML = budgets.map(b=>{
+  const pct = Math.round(b.actual/b.budget*100);
+  const color = pct>90?'#E74C3C':pct>70?'#E67E22':'#27AE60';
+  return `<div class="prog-row">
+    <div class="prog-label"><span>${b.cat}</span><span>Rs ${b.actual.toLocaleString()} / ${b.budget.toLocaleString()} (${pct}%)</span></div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${color}"></div></div>
+  </div>`;}).join('');
+
+// ─── EXPENSES ──────────────────────────────────────────
+const expenses = [{item:'Chicken 20kg',cat:'Ingredients',amt:'Rs 7,200'},{item:'Gas Cylinder x2',cat:'Utility',amt:'Rs 4,800'},{item:'Vegetables',cat:'Ingredients',amt:'Rs 3,500'},{item:'Cleaning supplies',cat:'Operations',amt:'Rs 1,200'},{item:'Facebook ad',cat:'Marketing',amt:'Rs 2,000'},{item:'Plumber repair',cat:'Maintenance',amt:'Rs 5,800'}];
+function renderExpenses(){
+  document.getElementById('expense-tbody').innerHTML = expenses.map(e=>`<tr><td>${e.item}</td><td><span class="badge b-gray" style="font-size:10px">${e.cat}</span></td><td>${e.amt}</td></tr>`).join('');
+}
+renderExpenses();
+function addExpense(){
+  expenses.unshift({item:'New Expense',cat:'Operations',amt:'Rs 1,000'});
+  renderExpenses();
+}
+
+// ─── MODALS ────────────────────────────────────────────
+function openModal(id){document.getElementById('modal-'+id).classList.add('open');}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+
+// ─── INIT ──────────────────────────────────────────────
+renderOrdersTable();
+renderMenuTable();
+renderStaffTable();
+renderShiftTable();
+
+// Fix staff tbody id after render
+setTimeout(()=>{
+  const tbody = document.querySelector('#pg-staff table.tbl tbody');
+  if(tbody && !tbody.id) tbody.id='staff-tbody';
+},100);
 </script>
 </body>
 </html>
